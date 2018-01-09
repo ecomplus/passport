@@ -30,8 +30,8 @@ fs.readFile(process.cwd() + '/config/config.json', 'utf8', (err, data) => {
       })
     })
 
-    app.listen(config.port, () => {
-      logger.log('Running Express server on port ' + config.port)
+    app.listen(config.http.port, () => {
+      logger.log('Running Express server on port ' + config.http.port)
     })
   }
 })
