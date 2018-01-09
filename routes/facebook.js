@@ -9,7 +9,7 @@ const passport = require('passport')
 const FacebookStrategy = require('passport-facebook').Strategy
 
 // import GET method callback
-const verbs = require('#common.js')
+const verbs = require('./#common.js')
 
 // read config file
 const config = JSON.parse(fs.readFileSync(process.cwd() + '/config/config.json', 'utf8'))
