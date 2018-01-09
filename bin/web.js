@@ -41,19 +41,30 @@ const conf = {
   'vary_fields': false
 }
 
+// Passport OAuth strategies
+let strategies
+
 function middleware (id, meta, body, respond, req, res, resource, verb, endpoint) {
   // function called before endpoints
   // authentications and other prerequisites when necessary
   // logger.log(resource)
   if (typeof req.headers['x-real-ip'] === 'string') {
-    // pass to endpoint
-    endpoint(id, meta, body, respond)
+    // check is strategy is available
+    if (strategies.hasOwnProperty(resource) && strategies[resource]) {
+      // pass to endpoint
+      endpoint(id, meta, body, respond, strategies[resource])
+    } else {
+      respond({}, null, 406, 101, 'Strategy not available yet, try with another OAuth provider')
+    }
   } else {
     respond({}, null, 403, 100, 'Who are you? Unknown IP address')
   }
 }
 
 module.exports = function (config) {
+  // credentials for OAuth strategies
+  strategies = config.strategies
+
   // complete configurations for rest auto router
   conf.port = config.http.port
   conf.base_uri = config.http.base_uri
