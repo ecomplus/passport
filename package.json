@@ -1,0 +1,22 @@
+{
+  "name": "ecomplus-passport",
+  "version": "0.1.0",
+  "description": "E-Com Plus service for customer login and signup with Passportjs",
+  "main": "main.js",
+  "scripts": {
+    "test": "node ./main.js"
+  },
+  "author": "E-Com Club",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "rest-auto-router": "3.x",
+    "passport": "0.x",
+    "passport-facebook": "2.x",
+    "passport-google-oauth": "1.x",
+    "passport-twitter": "1.x",
+    "passport-instagram": "1.x",
+    "passport-yahoo-oauth": "0.x",
+    "passport-windowslive": "1.x"
+  }
+}
