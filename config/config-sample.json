@@ -1,3 +1,10 @@
 {
-  
+  "http": {
+    "port": 3000,
+    "base_uri": "/v1/",
+    "proxy": {
+      "timeout": 30000,
+      "auth": "ABC"
+    }
+  }
 }
