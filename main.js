@@ -36,7 +36,8 @@ process.on('uncaughtException', error)
 // web application
 // recieve requests from Nginx by reverse proxy
 const web = require('./bin/web.js')
-fs.readFile('file', 'utf8', (err, data) => {
+// read config file
+fs.readFile('./config/config.json', 'utf8', (err, data) => {
   if (err) {
     // can't read config file
     error(err)
