@@ -16,6 +16,7 @@ const config = JSON.parse(fs.readFileSync(process.cwd() + '/config/config.json',
 
 if (config.strategies.hasOwnProperty('facebook') && config.strategies.facebook) {
   // config passport
+  // https://github.com/jaredhanson/passport-facebook
   passport.use(new FacebookStrategy({
     clientID: config.strategies.facebook.client_id,
     clientSecret: config.strategies.facebook.client_secret,
