@@ -45,7 +45,7 @@ const conf = {
 }
 
 // read config file
-fs.readFile('./../config/config.json', 'utf8', (err, data) => {
+fs.readFile(process.cwd() + '/config/config.json', 'utf8', (err, data) => {
   if (err) {
     // can't read config file
     throw err

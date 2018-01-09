@@ -4,7 +4,7 @@
 const fs = require('fs')
 
 // read config file
-const config = JSON.parse(fs.readFileSync('./../config/config.json', 'utf8'))
+const config = JSON.parse(fs.readFileSync(process.cwd() + '/config/config.json', 'utf8'))
 
 module.exports = {
   'get': ([ id, meta, body, respond ], provider, passport) => {
