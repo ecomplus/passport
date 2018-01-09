@@ -1,13 +1,11 @@
 {
   "host": "https://passport.e-com.plus",
-  "http": {
-    "port": 3000,
-    "base_uri": "/v1/"
-  },
+  "baseUri": "/v1/",
+  "proxyPort": 3000,
   "strategies": {
     "facebook": {
-      "client_id": "",
-      "client_secret": ""
+      "clientID": "",
+      "clientSecret": ""
     }
   }
 }
