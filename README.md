@@ -25,6 +25,5 @@ node ./main.js
 # Web server
 You need to use a web server such as NGINX or Apache HTTP,
 proxy passing the requests to configured TCP port.
-
 Your proxy must pass _X-Authentication_ header with same value of
 `config.http.proxy.auth`.
