@@ -1,5 +1,5 @@
 {
-  "host": "https://passport.e-com.plus/",
+  "host": "https://passport.e-com.plus",
   "http": {
     "port": 3000,
     "base_uri": "/v1/",
