@@ -6,6 +6,9 @@ const logger = require('./../lib/Logger.js')
 // https://www.npmjs.com/package/rest-auto-router
 const restAutoRouter = require('rest-auto-router')
 
+// NodeJS filesystem module
+const fs = require('fs')
+
 // web server configuration
 const conf = {
   // path to routes folder
@@ -41,36 +44,21 @@ const conf = {
   'vary_fields': false
 }
 
-// Passport OAuth strategies
-let strategies
-
-function middleware (id, meta, body, respond, req, res, resource, verb, endpoint) {
-  // function called before endpoints
-  // authentications and other prerequisites when necessary
-  // logger.log(resource)
-  if (typeof req.headers['x-real-ip'] === 'string') {
-    // check is strategy is available
-    if (strategies.hasOwnProperty(resource) && strategies[resource]) {
-      // pass to endpoint
-      endpoint(id, meta, body, respond, strategies[resource])
-    } else {
-      respond({}, null, 406, 101, 'Strategy not available yet, try with another OAuth provider')
-    }
+// read config file
+fs.readFile('./../config/config.json', 'utf8', (err, data) => {
+  if (err) {
+    // can't read config file
+    throw err
   } else {
-    respond({}, null, 403, 100, 'Who are you? Unknown IP address')
+    let config = JSON.parse(data)
+
+    // complete configurations for rest auto router
+    conf.port = config.http.port
+    conf.base_uri = config.http.base_uri
+    conf.proxy = config.http.proxy
+
+    // start web application
+    // recieve requests from Nginx by reverse proxy
+    restAutoRouter(conf, null, logger)
   }
-}
-
-module.exports = function (config) {
-  // credentials for OAuth strategies
-  strategies = config.strategies
-
-  // complete configurations for rest auto router
-  conf.port = config.http.port
-  conf.base_uri = config.http.base_uri
-  conf.proxy = config.http.proxy
-
-  // start web application
-  // recieve requests from Nginx by reverse proxy
-  restAutoRouter(conf, middleware, logger)
-}
+})

@@ -8,10 +8,7 @@
  * @author E-Com Club
  */
 
-// NodeJS filesystem module
-const fs = require('fs')
-
-function error (err) {
+process.on('uncaughtException', (err) => {
   // fatal error
   // log to file before exit
   let msg = '\n[' + new Date().toString() + ']\n'
@@ -26,33 +23,15 @@ function error (err) {
     msg += '\n'
   }
 
+  let fs = require('fs')
   fs.appendFile('/var/log/nodejs/_stderr', msg, () => {
     process.exit(1)
   })
-}
-
-process.on('uncaughtException', error)
+})
 
 // web application
 // recieve requests from Nginx by reverse proxy
-const web = require('./bin/web.js')
-// read config file
-fs.readFile('./config/config.json', 'utf8', (err, data) => {
-  if (err) {
-    // can't read config file
-    error(err)
-  } else {
-    let config
-    try {
-      config = JSON.parse(data)
-      // start web app
-      web(config)
-    } catch (e) {
-      // invalid JSON
-      error(new Error('config/config.json must contain valid JSON'))
-    }
-  }
-})
+require('./bin/web.js')
 
 // local application
 // executable server side only
