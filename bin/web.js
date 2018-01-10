@@ -112,10 +112,10 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                 // run passport
                 next()
               } else {
-                res.send(400, 'Invalid request ID, must follow RegEx pattern ^[\\w.]{32}$')
+                res.status(400).send('Invalid request ID, must follow RegEx pattern ^[\\w.]{32}$')
               }
             } else {
-              res.send(400, 'Invalid Store ID')
+              res.status(400).send('Invalid Store ID')
             }
           }, passport.authenticate(provider, {
             session: false
@@ -137,15 +137,13 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                 // return authentication object
                 res.json(auth)
               } else {
-                res.status(403)
-                res.json({
+                res.status(403).json({
                   'status': 403,
                   'error': 'Forbidden, token null, expired or overwritten, restart the OAuth flux'
                 })
               }
             } else {
-              res.status(401)
-              res.json({
+              res.status(401).json({
                 'status': 401,
                 'error': 'Unauthorized, request ID doesn\'t match'
               })
