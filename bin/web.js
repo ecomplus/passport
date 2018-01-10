@@ -19,7 +19,7 @@ const Strategies = {
     'Init': require('passport-facebook').Strategy
   },
   'google': {
-    'Init': require('passport-google-oauth').Strategy
+    'Init': require('passport-google-oauth20').Strategy
   },
   'twitter': {
     'Init': require('passport-twitter').Strategy,
@@ -36,7 +36,7 @@ const Strategies = {
   },
   'yah': {
     // yahoo
-    'Init': require('passport-google-oauth20').Strategy,
+    'Init': require('passport-yahoo-oauth').Strategy,
     'options': [
       'consumerKey',
       'consumerSecret'
