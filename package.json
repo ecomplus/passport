@@ -16,7 +16,7 @@
     "moment": "2.x",
     "passport": "0.x",
     "passport-facebook": "2.x",
-    "passport-google-oauth": "1.x",
+    "passport-google-oauth20": "1.x",
     "passport-twitter": "1.x",
     "passport-instagram": "1.x",
     "passport-yahoo-oauth": "0.x",

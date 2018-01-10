@@ -36,7 +36,7 @@ const Strategies = {
   },
   'yah': {
     // yahoo
-    'Init': require('passport-yahoo-oauth').Strategy,
+    'Init': require('passport-google-oauth20').Strategy,
     'options': [
       'consumerKey',
       'consumerSecret'
