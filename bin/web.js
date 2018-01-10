@@ -126,7 +126,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             res.sendFile(root + '/assets/callback.html')
           })
 
-          app.get(path + '/:store/:id', (req, res, next) => {
+          app.get(path + '/:store/:id/oauth', (req, res, next) => {
             res.setHeader('content-type', 'text/plain; charset=utf-8')
             // check store ID
             let store = parseInt(req.params.store, 10)
@@ -184,6 +184,15 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     // initialize Passport
     app.use(passport.initialize())
 
+    // handle OAuth errors
+    app.use(/.*\/(callback\.html|oauth)$/, (err, req, res, next) => {
+      res.status(403)
+      res.json({
+        'status': 403,
+        'error': err.message
+      })
+    })
+
     // production error handler
     // no stacktraces leaked to user
     app.use((err, req, res, next) => {
@@ -195,8 +204,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       }
       res.status(status)
       res.json({
-        'status': status,
-        'error': err.message
+        'status': status
       })
       logger.error(err)
     })
