@@ -21,26 +21,11 @@ const Strategies = {
   'google': {
     'Init': require('passport-google-oauth20').Strategy
   },
-  'twitter': {
-    'Init': require('passport-twitter').Strategy,
-    'options': [
-      'consumerKey',
-      'consumerSecret'
-    ]
-  },
   'microsoft': {
     'Init': require('passport-windowslive').Strategy
   },
   'instagram': {
     'Init': require('passport-instagram').Strategy
-  },
-  'yah': {
-    // yahoo
-    'Init': require('passport-yahoo-oauth').Strategy,
-    'options': [
-      'consumerKey',
-      'consumerSecret'
-    ]
   }
 }
 
@@ -82,29 +67,17 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       if (Strategies.hasOwnProperty(provider) && strategies.hasOwnProperty(provider)) {
         let credentials = strategies[provider]
         let Strategy = Strategies[provider]
-        if (typeof credentials === 'object' && credentials !== null) {
-          let options
-
-          if (!Strategy.hasOwnProperty('options')) {
-            // default options
-            options = {
-              'clientID': credentials.clientID,
-              'clientSecret': credentials.clientSecret
-            }
-          } else {
-            options = {}
-            for (let i = 0; i < Strategy.options.length; i++) {
-              let opt = Strategy.options[i]
-              options[opt] = credentials[opt]
-            }
-          }
-
+        if (typeof credentials === 'object' && credentials !== null && credentials.clientID !== '') {
           let path = config.baseUri + provider
-          // callback always with the same pattern
-          options.callbackURL = config.host + path + '/callback.html'
 
           // add strategy
-          passport.use(new Strategy.Init(options, (accessToken, refreshToken, profile, done) => {
+          passport.use(new Strategy.Init({
+            // OAuth 2.0 auth
+            'clientID': credentials.clientID,
+            'clientSecret': credentials.clientSecret,
+            // same callback pattern always
+            'options.callbackURL': config.host + path + '/callback.html'
+          }, (accessToken, refreshToken, profile, done) => {
             // find or create user account
             // generate JSON Web Token
             let user = profile

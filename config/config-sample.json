@@ -11,10 +11,6 @@
       "clientID": "",
       "clientSecret": ""
     },
-    "twitter": {
-      "consumerKey": "",
-      "consumerSecret": ""
-    },
     "microsoft": {
       "clientID": "",
       "clientSecret": ""
@@ -22,10 +18,6 @@
     "instagram": {
       "clientID": "",
       "clientSecret": ""
-    },
-    "yah": {
-      "consumerKey": "",
-      "consumerSecret": ""
     }
   }
 }
