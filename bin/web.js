@@ -92,6 +92,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
               'clientSecret': credentials.clientSecret
             }
           } else {
+            options = {}
             for (let i = 0; i < Strategy.options.length; i++) {
               let opt = Strategy.options[i]
               options[opt] = credentials[opt]
