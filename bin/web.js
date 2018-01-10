@@ -20,19 +20,9 @@ const Strategies = {
     'scope': [
       // https://developers.facebook.com/docs/graph-api/reference/v2.11/user
       'id',
-      'address',
-      'age_range',
-      'birthday',
-      'cover',
       'email',
       'first_name',
-      'gender',
-      'is_verified',
-      'last_name',
-      'locale',
-      'middle_name',
-      'name_format',
-      'verified'
+      'gender'
     ]
   },
   'google': {
