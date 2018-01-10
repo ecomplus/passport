@@ -32,8 +32,6 @@ const Strategies = {
       'locale',
       'middle_name',
       'name_format',
-      'profile_pic',
-      'short_name',
       'verified'
     ]
   },
