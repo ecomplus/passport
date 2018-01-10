@@ -104,20 +104,59 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             res.sendFile(root + '/assets/callback.html')
           })
 
-          app.get(path + '/:id', (req, res, next) => {
-            // check id
-            if (/^[\w.]{32}$/.test(req.params.id)) {
-              // create id cookie
-              res.cookie('_passport_id', req.params.id, cookieOptions)
-              // pass next middleware
-              // run passport
-              next()
+          app.get(path + '/:store/:id', (req, res, next) => {
+            res.setHeader('content-type', 'text/plain; charset=utf-8')
+            // check store ID
+            let store = parseInt(req.params.store, 10)
+            if (store > 100) {
+              // check id
+              if (/^[\w.]{32}$/.test(req.params.id)) {
+                // create id and store cookies
+                res.cookie('_passport_' + store + '_id', req.params.id, cookieOptions)
+                res.cookie('_passport_store', store, cookieOptions)
+                // pass next middleware
+                // run passport
+                next()
+              } else {
+                res.send(400, 'Invalid request ID, must follow RegEx pattern ^[\\w.]{32}$')
+              }
             } else {
-              res.send(400, 'Invalid ID, must follow RegEx pattern ^[\\w.]{32}$')
+              res.send(400, 'Invalid Store ID')
             }
           }, passport.authenticate(provider, {
             session: false
           }))
+
+          app.get(path + '/:store/:id/token.json', (req, res, next) => {
+            // check if id is the same of stored
+            let store = req.params.store
+            let cookieName = '_passport_' + store + '_id'
+            let id = req.cookies[cookieName]
+            if (id === req.params.id) {
+              // valid id
+              // validate token with store ID
+              let auth = req.cookies._passport_token
+              // let auth = auth.tokenValidate(req.cookies._passport_token, store)
+              // remove id cookie
+              res.clearCookie(cookieName)
+              if (auth) {
+                // return authentication object
+                res.json(auth)
+              } else {
+                res.status(403)
+                res.json({
+                  'status': 403,
+                  'error': 'Forbidden, token null, expired or overwritten, restart the OAuth flux'
+                })
+              }
+            } else {
+              res.status(401)
+              res.json({
+                'status': 401,
+                'error': 'Unauthorized, request ID doesn\'t match'
+              })
+            }
+          })
         }
       }
     }
