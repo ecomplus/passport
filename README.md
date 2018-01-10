@@ -26,3 +26,18 @@ node ./main.js
 # Web server
 You need to use a web server such as NGINX or Apache HTTP,
 proxy passing the requests to configured TCP port.
+
+# Frontend script
+
+## Example
+
+```javascript
+let uri = 'https://passport.e-com.plus/v1/google/101/sdjcksadcasbcsabdcbsldjlbcasbdcs'
+let popup = window.open(uri, 'Passport', 'height=300,width=200')
+if (window.focus) {
+  popup.focus()
+}
+popup.onunload = function () {
+  // run ajax to get token
+}
+```
