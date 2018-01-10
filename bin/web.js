@@ -55,10 +55,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       // browser session only
       'expires': 0,
       // cookie only accessible by the web server
-      'httpOnly': true,
-      // cookie should be signed
-      // can detect if the client modified the cookie
-      'signed': true
+      'httpOnly': true
     }
 
     // initialize OAuth strategies
