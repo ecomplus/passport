@@ -82,6 +82,12 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       res.json(availableStrategies)
     })
 
+    app.get(config.baseUri + 'fail.html', (req, res) => {
+      // return HTML file
+      // only closes the window
+      res.sendFile(root + '/assets/callback.html')
+    })
+
     for (let provider in strategies) {
       if (Strategies.hasOwnProperty(provider) && strategies.hasOwnProperty(provider)) {
         let credentials = strategies[provider]
@@ -112,20 +118,6 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             options.scope = Strategy.scope
           }
 
-          app.get(path + '/callback.html', passport.authenticate(provider, options), (req, res) => {
-            let token
-            if (typeof req.user === 'object' && req.user !== null && req.user.token) {
-              // successful authentication
-              token = req.user.token
-            } else {
-              token = null
-            }
-            // create token cookie
-            res.cookie('_passport_token', token, cookieOptions)
-            // return HTML file
-            res.sendFile(root + '/assets/callback.html')
-          })
-
           app.get(path + '/:store/:id', (req, res, next) => {
             res.setHeader('content-type', 'text/plain; charset=utf-8')
             // check store ID
@@ -146,6 +138,23 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
               res.status(400).send('Invalid Store ID')
             }
           }, passport.authenticate(provider, options))
+
+          // add failure handling
+          options.failureRedirect = config.baseUri + 'fail.html'
+
+          app.get(path + '/callback.html', passport.authenticate(provider, options), (req, res) => {
+            let token
+            if (typeof req.user === 'object' && req.user !== null && req.user.token) {
+              // successful authentication
+              token = req.user.token
+            } else {
+              token = null
+            }
+            // create token cookie
+            res.cookie('_passport_token', token, cookieOptions)
+            // return HTML file
+            res.sendFile(root + '/assets/callback.html')
+          })
 
           app.get(path + '/:store/:id/token.json', (req, res, next) => {
             // check if id is the same of stored
