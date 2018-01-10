@@ -17,7 +17,7 @@ const passport = require('passport')
 const Strategies = {
   'facebook': {
     'Init': require('passport-facebook').Strategy,
-    'scopes': [
+    'scope': [
       'email',
       'public_profile',
       'user_birthday',
@@ -26,13 +26,13 @@ const Strategies = {
   },
   'google': {
     'Init': require('passport-google-oauth20').Strategy,
-    'scopes': [
+    'scope': [
       'https://www.googleapis.com/auth/plus.login'
     ]
   },
   'windowslive': {
     'Init': require('passport-windowslive').Strategy,
-    'scopes': [
+    'scope': [
       'wl.signin',
       'wl.basic',
       'wl.birthday',
