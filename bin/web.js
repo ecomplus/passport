@@ -62,7 +62,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     let strategies = config.strategies
     let availableStrategies = []
 
-    app.get('/providers.json', (req, res) => {
+    app.get(config.baseUri, (req, res) => {
       res.json(availableStrategies)
     })
 
