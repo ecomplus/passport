@@ -21,7 +21,7 @@ const Strategies = {
   'google': {
     'Init': require('passport-google-oauth20').Strategy
   },
-  'microsoft': {
+  'windowslive': {
     'Init': require('passport-windowslive').Strategy
   },
   'paypal': {
