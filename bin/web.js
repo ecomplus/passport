@@ -60,6 +60,12 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
 
     // initialize OAuth strategies
     let strategies = config.strategies
+    let availableStrategies = []
+
+    app.get('/providers.json', (req, res) => {
+      res.json(availableStrategies)
+    })
+
     for (let provider in strategies) {
       if (Strategies.hasOwnProperty(provider) && strategies.hasOwnProperty(provider)) {
         let credentials = strategies[provider]
@@ -149,6 +155,8 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
               })
             }
           })
+
+          availableStrategies.push(provider)
         }
       }
     }
