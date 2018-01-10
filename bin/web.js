@@ -17,6 +17,30 @@ const passport = require('passport')
 const Strategies = {
   'facebook': {
     'Init': require('passport-facebook').Strategy
+  },
+  'google': {
+    'Init': require('passport-google-oauth').Strategy
+  },
+  'twitter': {
+    'Init': require('passport-twitter').Strategy,
+    'options': [
+      'consumerKey',
+      'consumerSecret'
+    ]
+  },
+  'microsoft': {
+    'Init': require('passport-windowslive').Strategy
+  },
+  'instagram': {
+    'Init': require('passport-instagram').Strategy
+  },
+  'yah': {
+    // yahoo
+    'Init': require('passport-yahoo-oauth').Strategy,
+    'options': [
+      'consumerKey',
+      'consumerSecret'
+    ]
   }
 }
 
@@ -68,10 +92,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
               'clientSecret': credentials.clientSecret
             }
           } else {
-            for (let opt in Strategy.options) {
-              if (Strategy.options.hasOwnProperty(opt)) {
-                options[opt] = credentials[opt]
-              }
+            for (let i = 0; i < Strategy.options.length; i++) {
+              let opt = Strategy.options[i]
+              options[opt] = credentials[opt]
             }
           }
 
