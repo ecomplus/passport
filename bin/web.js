@@ -24,8 +24,8 @@ const Strategies = {
   'microsoft': {
     'Init': require('passport-windowslive').Strategy
   },
-  'instagram': {
-    'Init': require('passport-instagram').Strategy
+  'paypal': {
+    'Init': require('passport-paypal-oauth').Strategy
   }
 }
 
