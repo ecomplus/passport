@@ -79,7 +79,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             'clientID': credentials.clientID,
             'clientSecret': credentials.clientSecret,
             // same callback pattern always
-            'options.callbackURL': config.host + path + '/callback.html'
+            'callbackURL': config.host + path + '/callback.html'
           }, (accessToken, refreshToken, profile, done) => {
             // find or create user account
             // generate JSON Web Token
