@@ -88,22 +88,6 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             return done(null, user)
           }))
 
-          app.get(path + '/:id', (req, res, next) => {
-            // check id
-            if (/^[\w.]{32}$/.test(req.params.id)) {
-              // create id cookie
-              res.cookie('_passport_id', req.params.id, cookieOptions)
-              // pass next middleware
-              // run passport
-              next()
-            } else {
-              res.sendStatus(400)
-              res.send('Invalid ID, must follow RegEx pattern ^[\\w.]{32}$')
-            }
-          }, passport.authenticate(provider, {
-            session: false
-          }))
-
           app.get(path + '/callback.html', passport.authenticate(provider, {
             session: false
           }), (req, res) => {
@@ -119,6 +103,21 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             // return HTML file
             res.sendFile(root + '/assets/callback.html')
           })
+
+          app.get(path + '/:id', (req, res, next) => {
+            // check id
+            if (/^[\w.]{32}$/.test(req.params.id)) {
+              // create id cookie
+              res.cookie('_passport_id', req.params.id, cookieOptions)
+              // pass next middleware
+              // run passport
+              next()
+            } else {
+              res.send(400, 'Invalid ID, must follow RegEx pattern ^[\\w.]{32}$')
+            }
+          }, passport.authenticate(provider, {
+            session: false
+          }))
         }
       }
     }
