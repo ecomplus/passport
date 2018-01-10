@@ -16,16 +16,41 @@ const bodyParser = require('body-parser')
 const passport = require('passport')
 const Strategies = {
   'facebook': {
-    'Init': require('passport-facebook').Strategy
+    'Init': require('passport-facebook').Strategy,
+    'scope': [
+      // https://developers.facebook.com/docs/graph-api/reference/v2.11/user
+      'id',
+      'address',
+      'age_range',
+      'birthday',
+      'cover',
+      'email',
+      'first_name',
+      'gender',
+      'is_verified',
+      'last_name',
+      'locale',
+      'middle_name',
+      'name_format',
+      'profile_pic',
+      'short_name',
+      'verified'
+    ]
   },
   'google': {
-    'Init': require('passport-google-oauth20').Strategy
+    'Init': require('passport-google-oauth20').Strategy,
+    'scope': [
+    ]
   },
   'windowslive': {
-    'Init': require('passport-windowslive').Strategy
+    'Init': require('passport-windowslive').Strategy,
+    'scope': [
+    ]
   },
   'paypal': {
-    'Init': require('passport-paypal-oauth').Strategy
+    'Init': require('passport-paypal-oauth').Strategy,
+    'scope': [
+    ]
   }
 }
 
@@ -124,7 +149,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
               res.status(400).send('Invalid Store ID')
             }
           }, passport.authenticate(provider, {
-            session: false
+            session: false,
+            display: 'popup',
+            scope: Strategy.scope
           }))
 
           app.get(path + '/:store/:id/token.json', (req, res, next) => {
