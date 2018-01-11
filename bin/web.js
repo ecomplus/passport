@@ -225,11 +225,25 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                 // find or create customer account
                 api.findCustomer(store, profile.provider, profile.id, (err, customerId) => {
                   if (!err) {
-                    // generate jwt
-                    res.json({
-                      'auth': auth.generateToken(store, customerId),
-                      'profile': profile
-                    })
+                    if (customerId) {
+                      // generate jwt
+                      res.json({
+                        'auth': auth.generateToken(store, customerId),
+                        'profile': profile
+                      })
+                    } else {
+                      api.createCustomer(store, profile, (err, customerId) => {
+                        if (err) {
+                          res.sendStatus(500)
+                        } else {
+                          // generate jwt
+                          res.json({
+                            'auth': auth.generateToken(store, customerId),
+                            'profile': profile
+                          })
+                        }
+                      })
+                    }
                   } else {
                     res.sendStatus(500)
                   }
