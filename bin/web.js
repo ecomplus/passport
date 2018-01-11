@@ -55,7 +55,7 @@ const Strategies = {
     'scope': [
       'wl.signin',
       'wl.basic',
-      'wl.emails',
+      // 'wl.emails',
       'wl.birthday'
       // 'wl.phone_numbers',
       // 'wl.postal_addresses'
