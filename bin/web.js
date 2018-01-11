@@ -250,6 +250,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     // production error handler
     // no stacktraces leaked to user
     app.use((err, req, res, next) => {
+      // write error on file
+      logger.error(err)
+
       let status
       if (err.status) {
         status = err.status
@@ -260,9 +263,6 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       res.json({
         'status': status
       })
-
-      // write error on file
-      logger.error(err)
     })
 
     app.listen(config.proxyPort, () => {
