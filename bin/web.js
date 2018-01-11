@@ -146,18 +146,26 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             let user = req.user
             if (typeof user === 'object' && user !== null && user.profile) {
               // successful authentication
-              // logger.log(user.profile)
-              if (user.profile.hasOwnProperty('_raw')) {
-                delete user.profile._raw
-              }
-
               let store = req.cookies._passport_store
               if (store) {
-                // create profile cookie
-                let options = Object.assign({}, cookieOptions)
-                // also limit cookie age to 2 minutes
-                options.maxAge = 120000
-                res.cookie('_passport_' + store + '_profile', JSON.stringify(user.profile), options)
+                // logger.log(user.profile)
+                if (user.profile.hasOwnProperty('_raw')) {
+                  delete user.profile._raw
+                }
+                let profile
+                try {
+                  profile = JSON.stringify(user.profile)
+                } catch (e) {
+                  logger.error(e)
+                }
+
+                if (profile) {
+                  // create profile cookie
+                  let options = Object.assign({}, cookieOptions)
+                  // also limit cookie age to 2 minutes
+                  options.maxAge = 120000
+                  res.cookie('_passport_' + store + '_profile', profile, options)
+                }
               }
             }
 
