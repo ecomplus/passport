@@ -222,30 +222,38 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                   return
                 }
 
+                let returnToken = (customerId) => {
+                  // generate jwt
+                  res.json({
+                    'auth': auth.generateToken(store, customerId),
+                    'profile': profile
+                  })
+                }
+
+                let handleError = (msg) => {
+                  if (msg) {
+                    res.sendStatus(400, msg)
+                  } else {
+                    res.sendStatus(500)
+                  }
+                }
+
                 // find or create customer account
-                api.findCustomer(store, profile.provider, profile.id, (err, customerId) => {
+                api.findCustomer(store, profile.provider, profile.id, (err, customerId, msg) => {
                   if (!err) {
                     if (customerId) {
-                      // generate jwt
-                      res.json({
-                        'auth': auth.generateToken(store, customerId),
-                        'profile': profile
-                      })
+                      returnToken(customerId)
                     } else {
-                      api.createCustomer(store, profile, (err, customerId) => {
+                      api.createCustomer(store, profile, (err, customerId, msg) => {
                         if (err) {
-                          res.sendStatus(500)
+                          handleError(msg)
                         } else {
-                          // generate jwt
-                          res.json({
-                            'auth': auth.generateToken(store, customerId),
-                            'profile': profile
-                          })
+                          returnToken(customerId)
                         }
                       })
                     }
                   } else {
-                    res.sendStatus(500)
+                    handleError(msg)
                   }
                 })
               } else {
