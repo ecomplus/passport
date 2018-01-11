@@ -160,6 +160,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
               // remove id cookie
               res.clearCookie(cookieName)
               if (auth) {
+                res.clearCookie('_passport_token')
                 // return authentication object
                 res.json(auth)
               } else {
