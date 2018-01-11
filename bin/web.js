@@ -26,12 +26,28 @@ const Strategies = {
       'public_profile',
       'user_birthday',
       'user_location'
+    ],
+    'profileFields': [
+      'id',
+      'first_name',
+      'middle_name',
+      'last_name',
+      'age_range',
+      'gender',
+      'locale',
+      'verified',
+      'picture',
+      'email',
+      'birthday',
+      'location'
     ]
   },
   'google': {
     'Init': require('passport-google-oauth20').Strategy,
     'scope': [
-      'https://www.googleapis.com/auth/plus.login'
+      'https://www.googleapis.com/auth/plus.login',
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/userinfo.email'
     ]
   },
   'windowslive': {
@@ -98,27 +114,19 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
         if (typeof credentials === 'object' && credentials !== null && credentials.clientID !== '') {
           let path = config.baseUri + provider
 
-          // add strategy
-          passport.use(new Strategy.Init({
+          let strategyConfig = {
             // OAuth 2.0 auth
             'clientID': credentials.clientID,
             'clientSecret': credentials.clientSecret,
             // same callback pattern always
-            'callbackURL': config.host + path + '/callback.html',
-            'profileFields': [
-              'id',
-              'name',
-              'first_name',
-              'last_name',
-              'age_range',
-              'gender',
-              'locale',
-              'picture',
-              'verified',
-              'photos',
-              'email'
-            ]
-          }, (accessToken, refreshToken, profile, done) => {
+            'callbackURL': config.host + path + '/callback.html'
+          }
+          if (Strategy.hasOwnProperty('profileFields')) {
+            strategyConfig.profileFields = Strategy.profileFields
+          }
+
+          // add strategy
+          passport.use(new Strategy.Init(strategyConfig, (accessToken, refreshToken, profile, done) => {
             let user = {}
             user.profile = profile
             // return authenticated
