@@ -12,6 +12,7 @@
   "dependencies": {
     "express": "4.x",
     "body-parser": "1.x",
+    "cookie-parser": "1.x",
     "jwt-simple": "0.x",
     "moment": "2.x",
     "passport": "0.x",

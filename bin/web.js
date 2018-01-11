@@ -13,6 +13,8 @@ const fs = require('fs')
 const Express = require('express')
 // body parsing middleware
 const bodyParser = require('body-parser')
+const cookieParser = require('cookie-parser')
+
 // Passport and strategies
 // http://www.passportjs.org/
 const passport = require('passport')
@@ -65,6 +67,8 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     let app = Express()
 
     app.use(bodyParser.json())
+    app.use(cookieParser())
+
     app.get('/', (req, res) => {
       res.json({
         'status': 'E-Com Plus Passport API is running'
