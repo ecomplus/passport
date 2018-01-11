@@ -4,6 +4,8 @@
 const logger = require('./../lib/Logger.js')
 // authentication with jwt
 const auth = require('./../lib/Auth.js')
+// methods to Store API
+const api = require('./../lib/Api.js')
 
 // NodeJS filesystem module
 const fs = require('fs')
@@ -221,12 +223,16 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                 }
 
                 // find or create customer account
-                let customerId = '123'
-
-                // generate jwt
-                res.json({
-                  'auth': auth.generateToken(store, customerId),
-                  'profile': profile
+                api.findCustomer(store, profile.provider, profile.id, (err, customerId) => {
+                  if (!err) {
+                    // generate jwt
+                    res.json({
+                      'auth': auth.generateToken(store, customerId),
+                      'profile': profile
+                    })
+                  } else {
+                    res.sendStatus(500)
+                  }
                 })
               } else {
                 res.status(403).json({
