@@ -104,7 +104,16 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             'clientID': credentials.clientID,
             'clientSecret': credentials.clientSecret,
             // same callback pattern always
-            'callbackURL': config.host + path + '/callback.html'
+            'callbackURL': config.host + path + '/callback.html',
+            // http://www.passportjs.org/docs/profile/
+            'profileFields': [
+              'provider',
+              'id',
+              'displayName',
+              'name',
+              'photos',
+              'email'
+            ]
           }, (accessToken, refreshToken, profile, done) => {
             let user = {}
             user.profile = profile
