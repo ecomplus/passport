@@ -38,7 +38,7 @@ const Strategies = {
       'verified',
       'picture',
       'email',
-      'user_birthday',
+      'birthday',
       'location'
     ]
   },
