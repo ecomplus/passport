@@ -143,6 +143,21 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           }
 
           app.get(path + '/callback.html', passport.authenticate(provider, options), (req, res) => {
+            let user = req.user
+            if (typeof user === 'object' && user !== null && user.profile) {
+              // successful authentication
+              logger.log(user.profile)
+              let profile = JSON.stringify(user.profile)
+              let store = req.cookies._passport_store
+              if (store) {
+                // create profile cookie
+                let options = Object.assign({}, cookieOptions)
+                // also limit cookie age to 2 minutes
+                options.maxAge = 120000
+                res.cookie('_passport_' + store + '_profile', profile, options)
+              }
+            }
+
             // return HTML file
             res.sendFile(root + '/assets/callback.html')
           })
