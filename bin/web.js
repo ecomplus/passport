@@ -2,6 +2,8 @@
 
 // log on files
 const logger = require('./../lib/Logger.js')
+// authentication with jwt
+const auth = require('./../lib/Auth.js')
 
 // NodeJS filesystem module
 const fs = require('fs')
@@ -56,6 +58,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
   } else {
     let config = JSON.parse(data)
 
+    // set jwt salt
+    auth.setSecret(config.jwtSecret)
+
     // new Express application
     let app = Express()
 
@@ -97,10 +102,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             // same callback pattern always
             'callbackURL': config.host + path + '/callback.html'
           }, (accessToken, refreshToken, profile, done) => {
-            // find or create user account
-            // generate JSON Web Token
-            let user = profile
-            user.token = 'JWT'
+            let user = {}
+            user.profile = profile
+            // return authenticated
             return done(null, user)
           }))
 
@@ -113,15 +117,20 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           }
 
           app.get(path + '/callback.html', passport.authenticate(provider, options), (req, res) => {
-            let token
-            if (typeof req.user === 'object' && req.user !== null && req.user.token) {
+            let user = req.user
+            if (typeof user === 'object' && user !== null && user.profile) {
               // successful authentication
-              token = req.user.token
-            } else {
-              token = null
+              let profile = JSON.stringify(user.profile)
+              let store = req.cookies._passport_store
+              if (store) {
+                // create profile cookie
+                let options = Object.assign({}, cookieOptions)
+                // also limit cookie age to 2 minutes
+                options.maxAge = 120000
+                res.cookie('_passport_' + store + '_profile', profile, options)
+              }
             }
-            // create token cookie
-            res.cookie('_passport_token', token, cookieOptions)
+
             // return HTML file
             res.sendFile(root + '/assets/callback.html')
           })
@@ -136,6 +145,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                 // create id and store cookies
                 res.cookie('_passport_' + store + '_id', req.params.id, cookieOptions)
                 res.cookie('_passport_store', store, cookieOptions)
+
                 // pass next middleware
                 // run passport
                 next()
@@ -149,24 +159,41 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
 
           app.get(path + '/:store/:id/token.json', (req, res, next) => {
             // check if id is the same of stored
-            let store = req.params.store
-            let cookieName = '_passport_' + store + '_id'
-            let id = req.cookies[cookieName]
-            if (id === req.params.id) {
+            let store = parseInt(req.params.store, 10)
+            let cookieName = '_passport_' + store
+            let id = req.cookies[cookieName + '_id']
+            if (store > 100 && id === req.params.id) {
               // valid id
-              // validate token with store ID
-              let auth = req.cookies._passport_token
-              // let auth = auth.tokenValidate(req.cookies._passport_token, store)
-              // remove id cookie
-              res.clearCookie(cookieName)
-              if (auth) {
-                res.clearCookie('_passport_token')
-                // return authentication object
-                res.json(auth)
+              // get user profile
+              let profile = req.cookies[cookieName + '_profile']
+              if (profile) {
+                // remove cookies
+                res.clearCookie(cookieName + '_id')
+                res.clearCookie(cookieName + '_profile')
+
+                try {
+                  profile = JSON.parse(profile)
+                } catch (e) {
+                  // invalid JSON
+                  res.status(403).json({
+                    'status': 403,
+                    'error': 'Forbidden, invalid profile object, restart the OAuth flux'
+                  })
+                  return
+                }
+
+                // find or create customer account
+                let customerId = '123'
+
+                // generate jwt
+                res.json({
+                  'auth': auth.generateToken(store, customerId),
+                  'profile': profile
+                })
               } else {
                 res.status(403).json({
                   'status': 403,
-                  'error': 'Forbidden, token null, expired or overwritten, restart the OAuth flux'
+                  'error': 'Forbidden, no profile found, restart the OAuth flux'
                 })
               }
             } else {
@@ -207,6 +234,8 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       res.json({
         'status': status
       })
+
+      // write error on file
       logger.error(err)
     })
 

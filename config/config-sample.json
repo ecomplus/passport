@@ -19,5 +19,6 @@
       "clientID": "",
       "clientSecret": ""
     }
-  }
+  },
+  "jwtSecret": "abcdef"
 }
