@@ -142,7 +142,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             options.scope = Strategy.scope
           }
 
-          app.get(path + '/callback.html', passport.authenticate(provider, options), (req, res) => {
+          app.get(path + '/callback.html', (req, res) => {
+            res.sendStatus(200)
+          }, passport.authenticate(provider, options), (req, res) => {
             let user = req.user
             if (typeof user === 'object' && user !== null && user.profile) {
               // successful authentication
