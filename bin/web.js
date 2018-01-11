@@ -232,9 +232,15 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
 
                 let handleError = (msg) => {
                   if (msg) {
-                    res.sendStatus(400, msg)
+                    res.status(400).json({
+                      'status': 400,
+                      'error': msg
+                    })
                   } else {
-                    res.sendStatus(500)
+                    res.status(500).json({
+                      'status': 500,
+                      'error': 'Internal server error'
+                    })
                   }
                 }
 
