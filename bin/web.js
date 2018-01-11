@@ -54,7 +54,11 @@ const Strategies = {
     'Init': require('passport-windowslive').Strategy,
     'scope': [
       'wl.signin',
-      'wl.basic'
+      'wl.basic',
+      'wl.emails',
+      'wl.birthday'
+      // 'wl.phone_numbers',
+      // 'wl.postal_addresses'
     ]
   },
   'paypal': {
