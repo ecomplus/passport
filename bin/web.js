@@ -105,7 +105,19 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             'clientSecret': credentials.clientSecret,
             // same callback pattern always
             'callbackURL': config.host + path + '/callback.html',
-            'profileFields': [ 'id', 'displayName', 'name', 'age_range', 'photos', 'email' ]
+            'profileFields': [
+              'id',
+              'name',
+              'first_name',
+              'last_name',
+              'age_range',
+              'gender',
+              'locale',
+              'picture',
+              'verified',
+              'photos',
+              'email'
+            ]
           }, (accessToken, refreshToken, profile, done) => {
             let user = {}
             user.profile = profile
