@@ -24,8 +24,8 @@ const Strategies = {
     'scope': [
       'email',
       'public_profile',
-      'user_birthday',
-      'user_location'
+      'user_birthday'
+      // 'user_location'
     ],
     'profileFields': [
       'id',
@@ -38,8 +38,8 @@ const Strategies = {
       'verified',
       'picture',
       'email',
-      'birthday',
-      'location'
+      'birthday'
+      // 'location'
     ]
   },
   'google': {
@@ -55,9 +55,10 @@ const Strategies = {
     'scope': [
       'wl.signin',
       'wl.basic',
-      'wl.birthday',
-      'wl.phone_numbers',
-      'wl.postal_addresses'
+      'wl.emails',
+      'wl.birthday'
+      // 'wl.phone_numbers',
+      // 'wl.postal_addresses'
     ]
   },
   'paypal': {
