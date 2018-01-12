@@ -245,11 +245,20 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                 }
 
                 // find or create customer account
-                api.findCustomer(store, profile.provider, profile.id, (err, customerId, msg) => {
+                let verifiedEmail
+                if (profile._json.verified === true) {
+                  if (Array.isArray(profile.emails) && profile.emails.length > 0) {
+                    // also search customer by email
+                    verifiedEmail = profile.emails[0].value
+                  }
+                }
+
+                let callback = (err, customerId, msg) => {
                   if (!err) {
                     if (customerId) {
                       returnToken(customerId)
                     } else {
+                      // no account found
                       api.createCustomer(store, profile, (err, customerId, msg) => {
                         if (err) {
                           handleError(msg)
@@ -261,7 +270,8 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                   } else {
                     handleError(msg)
                   }
-                })
+                }
+                api.findCustomer(store, profile.provider, profile.id, verifiedEmail, callback)
               } else {
                 res.status(403).json({
                   'status': 403,
