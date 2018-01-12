@@ -246,11 +246,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
 
                 // find or create customer account
                 let verifiedEmail
-                if (profile._json.verified === true) {
-                  if (Array.isArray(profile.emails) && profile.emails.length > 0) {
-                    // also search customer by email
-                    verifiedEmail = profile.emails[0].value
-                  }
+                if (Array.isArray(profile.emails) && profile.emails.length > 0) {
+                  // also search customer by email
+                  verifiedEmail = profile.emails[0].value
                 }
 
                 let callback = (err, customerId, msg) => {
