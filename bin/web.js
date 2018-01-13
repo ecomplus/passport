@@ -62,9 +62,6 @@ const Strategies = {
       // 'wl.phone_numbers',
       // 'wl.postal_addresses'
     ]
-  },
-  'paypal': {
-    'Init': require('passport-paypal-oauth').Strategy
   }
 }
 

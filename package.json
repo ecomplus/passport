@@ -18,7 +18,6 @@
     "passport": "0.x",
     "passport-facebook": "2.x",
     "passport-google-oauth20": "1.x",
-    "passport-windowslive": "1.x",
-    "passport-paypal-oauth": "0.x"
+    "passport-windowslive": "1.x"
   }
 }

@@ -14,10 +14,6 @@
     "windowslive": {
       "clientID": "",
       "clientSecret": ""
-    },
-    "paypal": {
-      "clientID": "",
-      "clientSecret": ""
     }
   },
   "jwtSecret": "abcdef"
