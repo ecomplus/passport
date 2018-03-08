@@ -7,7 +7,7 @@
     "test": "node ./main.js"
   },
   "author": "E-Com Club",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "private": true,
   "dependencies": {
     "express": "4.x",
