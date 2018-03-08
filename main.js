@@ -4,7 +4,7 @@
  * @file E-Com Plus service for customer login and signup with Passportjs
  * @copyright E-Com Club. All rights reserved. Since 2016
  * <br>E-COM CLUB SOFTWARES PARA E-COMMERCE LTDA / CNPJ: 24.356.660/0001-78
- * @license MIT
+ * @license GPL-3.0
  * @author E-Com Club
  */
 
