@@ -76,9 +76,11 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
   } else {
     let config = JSON.parse(data)
 
+    // setting up the app
     // set jwt salt
     auth.setSecret(config.jwtSecret)
-
+    // Store API definitions
+    api.setApi(config.apiHost, config.apiBaseUri, config.apiPort)
     // new Express application
     let app = Express()
 

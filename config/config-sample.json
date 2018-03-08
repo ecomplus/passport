@@ -16,5 +16,8 @@
       "clientSecret": ""
     }
   },
-  "jwtSecret": "abcdef"
+  "jwtSecret": "abcdef",
+  "apiHost": "127.0.0.1",
+  "apiBaseUri": "/v1/",
+  "apiPort": 443
 }
