@@ -127,13 +127,18 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             strategyConfig.profileFields = Strategy.profileFields
           }
 
-          // add strategy
-          passport.use(new Strategy.Init(strategyConfig, (accessToken, refreshToken, profile, done) => {
+          let strategyCallback = (accessToken, refreshToken, profile, done) => {
             let user = {}
             user.profile = profile
             // return authenticated
             return done(null, user)
-          }))
+          }
+
+          // add strategy middleware
+          let middleware = provider + '-app-1'
+          passport.use(middleware, () => {
+            return new Strategy.Init(strategyConfig, strategyCallback)
+          })
 
           // authenticate strategy options
           let options = {
@@ -143,7 +148,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             options.scope = Strategy.scope
           }
 
-          app.get(path + '/callback.html', passport.authenticate(provider, options), (req, res) => {
+          app.get(path + '/callback.html', passport.authenticate(middleware, options), (req, res) => {
             let user = req.user
             if (typeof user === 'object' && user !== null && user.profile) {
               // successful authentication
@@ -194,7 +199,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             } else {
               res.status(400).send('Invalid Store ID')
             }
-          }, passport.authenticate(provider, options))
+          }, passport.authenticate(middleware, options))
 
           app.get(path + '/:store/:id/token.json', (req, res, next) => {
             // check if id is the same of stored
