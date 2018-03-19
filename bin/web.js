@@ -109,187 +109,199 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       res.json(availableStrategies)
     })
 
-    for (let provider in strategies) {
-      if (Strategies.hasOwnProperty(provider) && strategies.hasOwnProperty(provider)) {
-        let credentials = strategies[provider]
-        let Strategy = Strategies[provider]
-        if (typeof credentials === 'object' && credentials !== null && credentials.clientID !== '') {
-          let path = config.baseUri + provider
+    let oauthStart = (req, res, next) => {
+      res.setHeader('content-type', 'text/plain; charset=utf-8')
+      // check store ID
+      let store = parseInt(req.params.store, 10)
+      if (store > 100) {
+        // check id
+        if (/^[\w.]{32}$/.test(req.params.id)) {
+          // create id and store cookies
+          res.cookie('_passport_' + store + '_id', req.params.id, cookieOptions)
+          res.cookie('_passport_store', store, cookieOptions)
 
-          let strategyConfig = {
-            // OAuth 2.0 auth
-            'clientID': credentials.clientID,
-            'clientSecret': credentials.clientSecret,
-            // same callback pattern always
-            'callbackURL': config.host + path + '/callback.html'
+          // pass next middleware
+          // run passport
+          next()
+        } else {
+          res.status(400).send('Invalid request ID, must follow RegEx pattern ^[\\w.]{32}$')
+        }
+      } else {
+        res.status(400).send('Invalid Store ID')
+      }
+    }
+
+    let oauthCallback = (req, res) => {
+      let user = req.user
+      if (typeof user === 'object' && user !== null && user.profile) {
+        // successful authentication
+        let store = req.cookies._passport_store
+        if (store) {
+          // logger.log(user.profile)
+          if (user.profile.hasOwnProperty('_raw')) {
+            delete user.profile._raw
           }
-          if (Strategy.hasOwnProperty('profileFields')) {
-            strategyConfig.profileFields = Strategy.profileFields
+          let profile
+          try {
+            profile = JSON.stringify(user.profile)
+          } catch (e) {
+            logger.error(e)
           }
 
-          let strategyCallback = (accessToken, refreshToken, profile, done) => {
-            let user = {}
-            user.profile = profile
-            // return authenticated
-            return done(null, user)
+          if (profile) {
+            // create profile cookie
+            let options = Object.assign({}, cookieOptions)
+            // also limit cookie age to 2 minutes
+            options.maxAge = 120000
+            res.cookie('_passport_' + store + '_profile', profile, options)
           }
-          let strategy = new Strategy.Init(strategyConfig, strategyCallback)
-          // logger.log(strategy._oauth2)
+        }
+      }
 
-          // add strategy middleware
-          passport.use(strategy)
+      // return HTML file
+      res.sendFile(root + '/assets/callback.html')
+    }
 
-          // authenticate strategy options
-          let options = {
-            'session': false
+    let oauthProfile = (req, res, next) => {
+      // check if id is the same of stored
+      let store = parseInt(req.params.store, 10)
+      let cookieName = '_passport_' + store
+      let id = req.cookies[cookieName + '_id']
+      if (store > 100 && id === req.params.id) {
+        // valid id
+        // get user profile
+        let profile = req.cookies[cookieName + '_profile']
+        if (profile) {
+          // remove cookies
+          res.clearCookie(cookieName + '_id')
+          res.clearCookie(cookieName + '_profile')
+
+          try {
+            profile = JSON.parse(profile)
+          } catch (e) {
+            // invalid JSON
+            res.status(403).json({
+              'status': 403,
+              'error': 'Forbidden, invalid profile object, restart the OAuth flux'
+            })
+            return
           }
-          if (Strategy.hasOwnProperty('scope')) {
-            options.scope = Strategy.scope
+
+          let returnToken = (customerId) => {
+            // generate jwt
+            res.json({
+              // 'profile': profile,
+              'auth': auth.generateToken(store, customerId)
+            })
           }
 
-          app.get(path + '/callback.html', passport.authenticate(provider, options), (req, res) => {
-            let user = req.user
-            if (typeof user === 'object' && user !== null && user.profile) {
-              // successful authentication
-              let store = req.cookies._passport_store
-              if (store) {
-                // logger.log(user.profile)
-                if (user.profile.hasOwnProperty('_raw')) {
-                  delete user.profile._raw
-                }
-                let profile
-                try {
-                  profile = JSON.stringify(user.profile)
-                } catch (e) {
-                  logger.error(e)
-                }
-
-                if (profile) {
-                  // create profile cookie
-                  let options = Object.assign({}, cookieOptions)
-                  // also limit cookie age to 2 minutes
-                  options.maxAge = 120000
-                  res.cookie('_passport_' + store + '_profile', profile, options)
-                }
-              }
-            }
-
-            // return HTML file
-            res.sendFile(root + '/assets/callback.html')
-          })
-
-          app.get(path + '/:store/:id/oauth', (req, res, next) => {
-            strategy._oauth2._clientId = 'test'
-            res.setHeader('content-type', 'text/plain; charset=utf-8')
-            // check store ID
-            let store = parseInt(req.params.store, 10)
-            if (store > 100) {
-              // check id
-              if (/^[\w.]{32}$/.test(req.params.id)) {
-                // create id and store cookies
-                res.cookie('_passport_' + store + '_id', req.params.id, cookieOptions)
-                res.cookie('_passport_store', store, cookieOptions)
-
-                // pass next middleware
-                // run passport
-                next()
-              } else {
-                res.status(400).send('Invalid request ID, must follow RegEx pattern ^[\\w.]{32}$')
-              }
+          let handleError = (msg) => {
+            if (msg) {
+              res.status(400).json({
+                'status': 400,
+                'error': msg
+              })
             } else {
-              res.status(400).send('Invalid Store ID')
+              res.status(500).json({
+                'status': 500,
+                'error': 'Internal server error'
+              })
             }
-          }, passport.authenticate(provider, options))
+          }
 
-          app.get(path + '/:store/:id/token.json', (req, res, next) => {
-            // check if id is the same of stored
-            let store = parseInt(req.params.store, 10)
-            let cookieName = '_passport_' + store
-            let id = req.cookies[cookieName + '_id']
-            if (store > 100 && id === req.params.id) {
-              // valid id
-              // get user profile
-              let profile = req.cookies[cookieName + '_profile']
-              if (profile) {
-                // remove cookies
-                res.clearCookie(cookieName + '_id')
-                res.clearCookie(cookieName + '_profile')
+          // find or create customer account
+          let verifiedEmail
+          if (Array.isArray(profile.emails) && profile.emails.length > 0) {
+            // also search customer by email
+            verifiedEmail = profile.emails[0].value
+          }
 
-                try {
-                  profile = JSON.parse(profile)
-                } catch (e) {
-                  // invalid JSON
-                  res.status(403).json({
-                    'status': 403,
-                    'error': 'Forbidden, invalid profile object, restart the OAuth flux'
-                  })
-                  return
-                }
-
-                let returnToken = (customerId) => {
-                  // generate jwt
-                  res.json({
-                    // 'profile': profile,
-                    'auth': auth.generateToken(store, customerId)
-                  })
-                }
-
-                let handleError = (msg) => {
-                  if (msg) {
-                    res.status(400).json({
-                      'status': 400,
-                      'error': msg
-                    })
-                  } else {
-                    res.status(500).json({
-                      'status': 500,
-                      'error': 'Internal server error'
-                    })
-                  }
-                }
-
-                // find or create customer account
-                let verifiedEmail
-                if (Array.isArray(profile.emails) && profile.emails.length > 0) {
-                  // also search customer by email
-                  verifiedEmail = profile.emails[0].value
-                }
-
-                let callback = (err, customerId, msg) => {
-                  if (!err) {
-                    if (customerId) {
-                      returnToken(customerId)
-                    } else {
-                      // no account found
-                      api.createCustomer(store, profile, (err, customerId, msg) => {
-                        if (err) {
-                          handleError(msg)
-                        } else {
-                          returnToken(customerId)
-                        }
-                      })
-                    }
-                  } else {
-                    handleError(msg)
-                  }
-                }
-                api.findCustomer(store, profile.provider, profile.id, verifiedEmail, callback)
+          let callback = (err, customerId, msg) => {
+            if (!err) {
+              if (customerId) {
+                returnToken(customerId)
               } else {
-                res.status(403).json({
-                  'status': 403,
-                  'error': 'Forbidden, no profile found, restart the OAuth flux'
+                // no account found
+                api.createCustomer(store, profile, (err, customerId, msg) => {
+                  if (err) {
+                    handleError(msg)
+                  } else {
+                    returnToken(customerId)
+                  }
                 })
               }
             } else {
-              res.status(401).json({
-                'status': 401,
-                'error': 'Unauthorized, request ID doesn\'t match'
-              })
+              handleError(msg)
             }
+          }
+          api.findCustomer(store, profile.provider, profile.id, verifiedEmail, callback)
+        } else {
+          res.status(403).json({
+            'status': 403,
+            'error': 'Forbidden, no profile found, restart the OAuth flux'
           })
-
-          availableStrategies.push(provider)
         }
+      } else {
+        res.status(401).json({
+          'status': 401,
+          'error': 'Unauthorized, request ID doesn\'t match'
+        })
+      }
+    }
+
+    let setupStrategy = (credentials, provider, Strategy, storeId) => {
+      if (typeof credentials === 'object' && credentials !== null && credentials.clientID !== '') {
+        let endpoint = provider
+        if (storeId) {
+          endpoint += '-' + storeId
+        }
+        let path = config.baseUri + endpoint
+
+        let strategyConfig = {
+          // OAuth 2.0 auth
+          'clientID': credentials.clientID,
+          'clientSecret': credentials.clientSecret,
+          // same callback pattern always
+          'callbackURL': config.host + path + '/callback.html'
+        }
+        if (Strategy.hasOwnProperty('profileFields')) {
+          strategyConfig.profileFields = Strategy.profileFields
+        }
+
+        let strategyCallback = (accessToken, refreshToken, profile, done) => {
+          let user = {}
+          user.profile = profile
+          // return authenticated
+          return done(null, user)
+        }
+        let strategy = new Strategy.Init(strategyConfig, strategyCallback)
+        // logger.log(strategy._oauth2)
+
+        // add strategy middleware
+        passport.use(endpoint, strategy)
+
+        // authenticate strategy options
+        let options = {
+          'session': false
+        }
+        if (Strategy.hasOwnProperty('scope')) {
+          options.scope = Strategy.scope
+        }
+
+        app.get(path + '/:store/:id/oauth', oauthStart, passport.authenticate(endpoint, options))
+        app.get(path + '/callback.html', passport.authenticate(endpoint, options), oauthCallback)
+        app.get(path + '/:store/:id/token.json', oauthProfile)
+
+        availableStrategies.push(provider)
+      }
+    }
+
+    for (let provider in strategies) {
+      if (Strategies.hasOwnProperty(provider) && strategies.hasOwnProperty(provider)) {
+        // setup default strategies
+        let credentials = strategies[provider]
+        let Strategy = Strategies[provider]
+        setupStrategy(credentials, provider, Strategy)
       }
     }
 
