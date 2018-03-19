@@ -128,15 +128,14 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           }
 
           let strategyCallback = (accessToken, refreshToken, profile, done) => {
+            logger.log(strategy)
             let user = {}
             user.profile = profile
             // return authenticated
             return done(null, user)
           }
           let strategy = new Strategy.Init(strategyConfig, strategyCallback)
-          logger.log(strategy)
-          logger.log(strategy._oauth2)
-          logger.log(JSON.stringify(strategy, null, 2))
+          // logger.log(strategy._oauth2)
 
           // add strategy middleware
           passport.use(strategy)
