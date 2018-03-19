@@ -137,8 +137,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           // logger.log(strategy._oauth2)
 
           setTimeout(() => {
+            logger.log('clientId changed')
             strategy._oauth2._clientId = 'test'
-          }, 3000)
+          }, 120000)
 
           // add strategy middleware
           passport.use(strategy)
