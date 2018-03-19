@@ -6,6 +6,8 @@ const logger = require('./../lib/Logger.js')
 const auth = require('./../lib/Auth.js')
 // methods to Store API
 const api = require('./../lib/Api.js')
+// list stores from E-Com Plus Main API
+const stores = require('./../lib/Stores.js')
 
 // NodeJS filesystem module
 const fs = require('fs')
@@ -81,6 +83,8 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     auth.setSecret(config.jwtSecret)
     // Store API definitions
     api.setApi(config.apiHost, config.apiBaseUri, config.apiPort)
+    // E-Com Plus Main API definitions
+    stores.setApi(config.mainApiHost, config.mainApiBaseUri, config.mainApiPort)
     // new Express application
     let app = Express()
 

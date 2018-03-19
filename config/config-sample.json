@@ -19,5 +19,8 @@
   "jwtSecret": "abcdef",
   "apiHost": "127.0.0.1",
   "apiBaseUri": "/v1/",
-  "apiPort": 443
+  "apiPort": 443,
+  "mainApiHost": "127.0.0.2",
+  "mainApiBaseUri": "/api/v1/",
+  "mainApiPort": 443
 }
