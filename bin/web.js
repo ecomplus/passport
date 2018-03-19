@@ -136,11 +136,6 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           let strategy = new Strategy.Init(strategyConfig, strategyCallback)
           // logger.log(strategy._oauth2)
 
-          passport.use(path, function (req, res, next) {
-            strategy._oauth2._clientId = 'test'
-            next()
-          })
-
           // add strategy middleware
           passport.use(strategy)
 
@@ -184,6 +179,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           })
 
           app.get(path + '/:store/:id/oauth', (req, res, next) => {
+            strategy._oauth2._clientId = 'test'
             res.setHeader('content-type', 'text/plain; charset=utf-8')
             // check store ID
             let store = parseInt(req.params.store, 10)
