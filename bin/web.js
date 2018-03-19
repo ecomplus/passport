@@ -135,6 +135,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             return done(null, user)
           }
           let strategy = new Strategy.Init(strategyConfig, strategyCallback)
+          logger.log(strategy)
           // logger.log(strategy._oauth2)
 
           // add strategy middleware
