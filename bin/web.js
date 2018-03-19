@@ -126,9 +126,6 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           if (Strategy.hasOwnProperty('profileFields')) {
             strategyConfig.profileFields = Strategy.profileFields
           }
-          setTimeout(() => {
-            strategyConfig.clientID = 'cbhjsbjdbckjds'
-          }, 100)
 
           let strategyCallback = (accessToken, refreshToken, profile, done) => {
             let user = {}
@@ -136,9 +133,14 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             // return authenticated
             return done(null, user)
           }
+          let strategy = new Strategy.Init(strategyConfig, strategyCallback)
+          setTimeout(() => {
+            strategyConfig.clientID = 1
+            strategy = new Strategy.Init(strategyConfig, strategyCallback)
+          }, 2000)
 
           // add strategy middleware
-          passport.use(new Strategy.Init(strategyConfig, strategyCallback))
+          passport.use(strategy)
 
           // authenticate strategy options
           let options = {
@@ -229,8 +231,8 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                 let returnToken = (customerId) => {
                   // generate jwt
                   res.json({
-                    'auth': auth.generateToken(store, customerId),
-                    'profile': profile
+                    // 'profile': profile,
+                    'auth': auth.generateToken(store, customerId)
                   })
                 }
 
