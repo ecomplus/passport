@@ -126,6 +126,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           if (Strategy.hasOwnProperty('profileFields')) {
             strategyConfig.profileFields = Strategy.profileFields
           }
+          setTimeout(() => {
+            strategyConfig.clientID = 'cbhjsbjdbckjds'
+          }, 100)
 
           let strategyCallback = (accessToken, refreshToken, profile, done) => {
             let user = {}
@@ -135,10 +138,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           }
 
           // add strategy middleware
-          let middleware = provider + '-app-1'
-          passport.use(middleware, () => {
-            return new Strategy.Init(strategyConfig, strategyCallback)
-          })
+          passport.use(new Strategy.Init(strategyConfig, strategyCallback))
 
           // authenticate strategy options
           let options = {
@@ -148,7 +148,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             options.scope = Strategy.scope
           }
 
-          app.get(path + '/callback.html', passport.authenticate(middleware, options), (req, res) => {
+          app.get(path + '/callback.html', passport.authenticate(provider, options), (req, res) => {
             let user = req.user
             if (typeof user === 'object' && user !== null && user.profile) {
               // successful authentication
@@ -199,7 +199,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             } else {
               res.status(400).send('Invalid Store ID')
             }
-          }, passport.authenticate(middleware, options))
+          }, passport.authenticate(provider, options))
 
           app.get(path + '/:store/:id/token.json', (req, res, next) => {
             // check if id is the same of stored
