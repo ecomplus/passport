@@ -134,10 +134,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             return done(null, user)
           }
           let strategy = new Strategy.Init(strategyConfig, strategyCallback)
-          setTimeout(() => {
-            strategyConfig.clientID = 1
-            strategy = new Strategy.Init(strategyConfig, strategyCallback)
-          }, 2000)
+          console.log(strategy)
+          console.log(strategy._oauth2)
+          console.log(JSON.stringify(strategy, null, 2))
 
           // add strategy middleware
           passport.use(strategy)
