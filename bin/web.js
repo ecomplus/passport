@@ -136,10 +136,10 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           let strategy = new Strategy.Init(strategyConfig, strategyCallback)
           // logger.log(strategy._oauth2)
 
-          setTimeout(() => {
-            logger.log('clientId changed')
+          passport.use(path, function (req, res, next) {
             strategy._oauth2._clientId = 'test'
-          }, 120000)
+            next()
+          })
 
           // add strategy middleware
           passport.use(strategy)
