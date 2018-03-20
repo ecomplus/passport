@@ -312,6 +312,50 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     // initialize Passport
     app.use(passport.initialize())
 
+    let setupCustomStrategies = () => {
+      // wait 10 minutes
+      setTimeout(() => {
+        stores.list((stores) => {
+          if (Array.isArray(stores)) {
+            let done = 0
+            let size = stores.length
+
+            for (let i = 0; i < size; i++) {
+              let storeId = stores[i].id
+              // delay to prevent rating limit
+              setTimeout(() => {
+                api.getProviders(storeId, (err, providers) => {
+                  if (!err && typeof providers === 'object' && providers !== null) {
+                    for (let provider in providers) {
+                      if (providers.hasOwnProperty(provider)) {
+                        let app = providers[provider]
+                        let Strategy = Strategies[provider]
+                        if (app && Strategy !== undefined && app.client_id && app.client_secret) {
+                          // setup strategy with store custom oauth app
+                          let credentials = {
+                            'clientID': app.client_id,
+                            'clientSecret': app.client_secret
+                          }
+                          setupStrategy(credentials, provider, Strategy, storeId)
+                        }
+                      }
+                    }
+                  }
+
+                  done++
+                  if (done === size) {
+                    // all done
+                    // schedule restart
+                    setupCustomStrategies()
+                  }
+                })
+              }, i * 800)
+            }
+          }
+        })
+      }, 600000)
+    }
+
     // handle OAuth errors
     app.use(/.*\/(callback\.html|oauth)$/, (err, req, res, next) => {
       res.status(403)
