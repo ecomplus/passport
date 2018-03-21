@@ -355,6 +355,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
         })
       }, 600000)
     }
+    setupCustomStrategies()
 
     // handle OAuth errors
     app.use(/.*\/(callback\.html|oauth)$/, (err, req, res, next) => {
