@@ -194,7 +194,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           let returnToken = (customerId) => {
             // generate jwt
             res.json({
-              // 'profile': profile,
+              'profile': profile,
               'auth': auth.generateToken(store, customerId)
             })
           }
