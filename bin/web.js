@@ -191,12 +191,17 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             return
           }
 
-          let returnToken = (customerId) => {
-            // generate jwt
-            res.json({
-              'profile': profile,
-              'auth': auth.generateToken(store, customerId)
-            })
+          let returnToken = (customer) => {
+            let out = {
+              // returns only public info
+              'customer': customer,
+              // generate jwt
+              'auth': {
+                'id': customer._id,
+                'token': auth.generateToken(store, customer._id)
+              }
+            }
+            res.json(out)
           }
 
           let handleError = (msg) => {
@@ -220,17 +225,17 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             verifiedEmail = profile.emails[0].value
           }
 
-          let callback = (err, customerId, msg) => {
+          let callback = (err, customer, msg) => {
             if (!err) {
-              if (customerId) {
-                returnToken(customerId)
+              if (customer) {
+                returnToken(customer)
               } else {
                 // no account found
-                api.createCustomer(store, profile, (err, customerId, msg) => {
+                api.createCustomer(store, profile, (err, customer, msg) => {
                   if (err) {
                     handleError(msg)
                   } else {
-                    returnToken(customerId)
+                    returnToken(customer)
                   }
                 })
               }
