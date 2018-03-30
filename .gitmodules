@@ -1,0 +1,3 @@
+[submodule "assets/site"]
+	path = assets/site
+	url = git@github.com:ecomclub/passport-site.git
