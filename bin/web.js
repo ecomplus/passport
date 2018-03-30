@@ -97,7 +97,8 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       })
     })
 
-    app.get('/site', Express.static(root + '/assets/site'))
+    // static E-Com Plus Passport website
+    app.use('/site', Express.static(root + '/assets/site'))
 
     // keep id and token on cookies
     let cookieOptions = {
