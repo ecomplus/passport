@@ -151,7 +151,12 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       let user = req.user
       if (typeof user === 'object' && user !== null && user.profile) {
         // successful authentication
-        let store = req.cookies._passport_store
+        let store
+        if (req.params.store) {
+          store = req.params.store
+        } else {
+          store = req.cookies._passport_store
+        }
         if (store) {
           // logger.log(user.profile)
           if (user.profile.hasOwnProperty('_raw')) {
@@ -272,18 +277,26 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
 
     let setupStrategy = (credentials, provider, Strategy, storeId) => {
       if (typeof credentials === 'object' && credentials !== null && credentials.clientID !== '') {
+        let path = config.baseUri + provider
+        // strategy endpoint
         let endpoint = provider
+        // same callback pattern always
+        let callbackUrl = config.host + path
+        let callbackPath = path
         if (storeId) {
+          // add store ID as URL param
+          callbackUrl += '/store/' + storeId
+          callbackPath += '/store/:store'
           endpoint += '-' + storeId
         }
-        let path = config.baseUri + endpoint
+        callbackUrl += '/callback.html'
+        callbackPath += '/callback.html'
 
         let strategyConfig = {
           // OAuth 2.0 auth
           'clientID': credentials.clientID,
           'clientSecret': credentials.clientSecret,
-          // same callback pattern always
-          'callbackURL': config.host + path + '/callback.html'
+          'callbackURL': callbackUrl
         }
         if (Strategy.hasOwnProperty('profileFields')) {
           strategyConfig.profileFields = Strategy.profileFields
@@ -310,7 +323,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
         }
 
         app.get(path + '/:store/:id/:sig/oauth', oauthStart, passport.authenticate(endpoint, options))
-        app.get(path + '/callback.html', passport.authenticate(endpoint, options), oauthCallback)
+        app.get(callbackPath, passport.authenticate(endpoint, options), oauthCallback)
         app.get(path + '/:store/:id/token.json', oauthProfile)
 
         availableStrategies.push(provider)
