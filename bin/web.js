@@ -91,13 +91,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     app.use(bodyParser.json())
     app.use(cookieParser())
 
-    app.get('/', (req, res) => {
-      res.json({
-        'status': 'E-Com Plus Passport API is running'
-      })
-    })
-
-    // static E-Com Plus Passport website
+    // static E-Com Plus Passport web app
+    app.get('/', Express.static(root + '/assets/app'))
+    // static website
     app.use('/site', Express.static(root + '/assets/site'))
 
     // keep id and token on cookies
@@ -116,6 +112,14 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       res.json(availableStrategies)
     })
 
+    app.get(config.baseUri + ':store/:id/login.html', (req, res) => {
+      // start login flow
+      let store = parseInt(req.params.store, 10)
+      // create session cookies
+      let sig = Math.floor((Math.random() * 10000000) + 10000000)
+      res.cookie('_passport_' + store + '_sig', sig, cookieOptions)
+    })
+
     let oauthStart = (req, res, next) => {
       res.setHeader('content-type', 'text/plain; charset=utf-8')
       // check store ID
@@ -123,13 +127,18 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       if (store > 100) {
         // check id
         if (/^[\w.]{32}$/.test(req.params.id)) {
-          // create id and store cookies
-          res.cookie('_passport_' + store + '_id', req.params.id, cookieOptions)
-          res.cookie('_passport_store', store, cookieOptions)
+          // check session
+          if (req.cookies['_passport_' + store + '_sig'] === req.params.sig) {
+            // create id and store cookies
+            res.cookie('_passport_' + store + '_id', req.params.id, cookieOptions)
+            res.cookie('_passport_store', store, cookieOptions)
 
-          // pass next middleware
-          // run passport
-          next()
+            // pass next middleware
+            // run passport
+            next()
+          } else {
+            res.status(400).send('Invalid session, restart flow at login.html')
+          }
         } else {
           res.status(400).send('Invalid request ID, must follow RegEx pattern ^[\\w.]{32}$')
         }
@@ -166,7 +175,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       }
 
       // return HTML file
-      res.sendFile(root + '/assets/callback.html')
+      res.sendFile(root + '/assets/app/callback.html')
     }
 
     let oauthProfile = (req, res, next) => {
@@ -300,7 +309,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           options.scope = Strategy.scope
         }
 
-        app.get(path + '/:store/:id/oauth', oauthStart, passport.authenticate(endpoint, options))
+        app.get(path + '/:store/:id/:sig/oauth', oauthStart, passport.authenticate(endpoint, options))
         app.get(path + '/callback.html', passport.authenticate(endpoint, options), oauthCallback)
         app.get(path + '/:store/:id/token.json', oauthProfile)
 
