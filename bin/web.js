@@ -277,26 +277,21 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
 
     let setupStrategy = (credentials, provider, Strategy, storeId) => {
       if (typeof credentials === 'object' && credentials !== null && credentials.clientID !== '') {
-        let path = config.baseUri + provider
-        // strategy endpoint
         let endpoint = provider
-        // same callback pattern always
-        let callbackUrl = config.host + path
-        let callbackPath = path
+        let callbackPath = config.baseUri + provider
         if (storeId) {
-          // add store ID as URL param
-          callbackUrl += '/store/' + storeId
-          callbackPath += '/store/:store'
           endpoint += '-' + storeId
+          // add store ID as URL param
+          callbackPath += '-:store(' + storeId + ')'
         }
-        callbackUrl += '/callback.html'
-        callbackPath += '/callback.html'
+        let path = config.baseUri + endpoint
 
         let strategyConfig = {
           // OAuth 2.0 auth
           'clientID': credentials.clientID,
           'clientSecret': credentials.clientSecret,
-          'callbackURL': callbackUrl
+          // same callback pattern always
+          'callbackURL': config.host + path + '/callback.html'
         }
         if (Strategy.hasOwnProperty('profileFields')) {
           strategyConfig.profileFields = Strategy.profileFields
@@ -323,10 +318,13 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
         }
 
         app.get(path + '/:store/:id/:sig/oauth', oauthStart, passport.authenticate(endpoint, options))
-        app.get(callbackPath, passport.authenticate(endpoint, options), oauthCallback)
-        app.get(path + '/:store/:id/token.json', oauthProfile)
+        app.get(callbackPath + '/callback.html', passport.authenticate(endpoint, options), oauthCallback)
 
-        availableStrategies.push(provider)
+        if (!storeId) {
+          // generic only
+          app.get(path + '(-*)?/:store/:id/token.json', oauthProfile)
+          availableStrategies.push(provider)
+        }
       }
     }
 
