@@ -18,14 +18,18 @@
         font-size: 17px;
         font-weight: 400;
       }
-      body > div {
-        max-width: 400px;
-        margin: 20px auto;
+      #box {
+        max-width: 100%;
+        padding: 20px;
       }
-      body > div > div {
+      #box > div {
+        max-width: 400px;
+        margin: 0 auto;
+      }
+      #box > div > div {
         margin-bottom: 20px;
       }
-      body > div > a {
+      #box > div > a {
         display: block;
         padding: 14px;
         margin-bottom: 7px;
@@ -39,8 +43,11 @@
         border-style: solid;
         color: #fff;
       }
-      body > div > a > i {
-        margin-right: 10px;
+      #box > div > a > span {
+        display: inline-block;
+        width: 30px;
+        text-align: center;
+        margin-right: 5px;
       }
       .facebook {
         background: #3b5999;
@@ -59,32 +66,40 @@
   </head>
 
   <body>
-    <div>
-      <div>Store name</div>
-      <a class="facebook" href="facebook">
-        <i class="fab fa-facebook-square"></i>
-        <% if (lang === 'pt_br') { %>
-          Entrar com Facebook
-        <% } else { %>
-          Login with Facebook
-        <% } %>
-      </a>
-      <a class="google" href="google">
-        <i class="fab fa-google"></i>
-        <% if (lang === 'pt_br') { %>
-          Entrar com Google
-        <% } else { %>
-          Login with Google
-        <% } %>
-      </a>
-      <a class="windows" href="windowslive">
-        <i class="fab fa-windows"></i>
-        <% if (lang === 'pt_br') { %>
-          Entrar com Windows
-        <% } else { %>
-          Login with Windows
-        <% } %>
-      </a>
+    <div id="box">
+      <div>
+        <div>Store name</div>
+        <a class="facebook" href="facebook">
+          <span>
+            <i class="fab fa-facebook-square"></i>
+          </span>
+          <% if (lang === 'pt_br') { %>
+            Entrar com Facebook
+          <% } else { %>
+            Login with Facebook
+          <% } %>
+        </a>
+        <a class="google" href="google">
+          <span>
+            <i class="fab fa-google"></i>
+          </span>
+          <% if (lang === 'pt_br') { %>
+            Entrar com Google
+          <% } else { %>
+            Login with Google
+          <% } %>
+        </a>
+        <a class="windows" href="windowslive">
+          <span>
+            <i class="fab fa-windows"></i>
+          </span>
+          <% if (lang === 'pt_br') { %>
+            Entrar com Windows
+          <% } else { %>
+            Login with Windows
+          <% } %>
+        </a>
+      </div>
     </div>
   </body>
 </html>
