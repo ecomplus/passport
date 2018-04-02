@@ -110,7 +110,7 @@
         <div>Store name</div>
         <% for (var strategy in providers) { %>
           <% if (providers.hasOwnProperty(strategy)) { %>
-            <% var link = oauthPath + strategy; %>
+            <% var link = baseUri + strategy + oauthPath; %>
             <% var provider = providers[strategy]; %>
             <a class="<%= provider.htmlClass %>" href="<%= link %>">
               <span>

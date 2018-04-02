@@ -145,7 +145,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
         let lang = req.params.lang
         let oauthPath = '/' + store + '/' + id + '/' + sig + '/oauth'
         let baseUri = config.baseUri
-        let providers = config.strategies
+        let providers = Object.assign({}, config.strategies)
         res.render('login', { lang, store, baseUri, oauthPath, providers })
       }
     })
