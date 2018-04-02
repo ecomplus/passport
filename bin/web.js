@@ -95,11 +95,17 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     app.set('views', root + '/assets/app/views')
     app.set('view engine', 'ejs')
 
+    // static E-Com Plus Passport website
+    app.use('/site', Express.static(root + '/assets/site'))
+    app.get('/site/pt_br.html', (req, res) => {
+      // default lang
+      // redirect to index
+      res.redirect('/site/')
+    })
+    // redirect domain root to site
     app.get('/', (req, res) => {
       res.redirect('/site/')
     })
-    // static E-Com Plus Passport website
-    app.use('/site', Express.static(root + '/assets/site'))
 
     // keep id and token on cookies
     let cookieOptions = {
