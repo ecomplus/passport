@@ -27,6 +27,7 @@
       }
       body > p {
         margin: 15px auto 0 auto;
+        padding: 25px 0;
         text-align: center;
         font-size: 13px;
       }
@@ -36,6 +37,10 @@
       }
       body > p a:hover {
         color: #c11a69;
+      }
+      body > p .fa-lock {
+        font-size: 18px;
+        color: #28a745;
       }
       #box {
         padding: 20px;
@@ -138,14 +143,16 @@
 
     <p>
       <% if (lang === 'pt_br') { %>
-        Esta loja utiliza login social para sua comodidade,
-        <a href="/site/" target="_blank">saiba porque</a>
-         o login social é mais seguro e prático
+        Esta loja utiliza login social para <b>sua segurança e praticidade</b>,
+        <a href="/site/" target="_blank">saiba mais</a>
       <% } else { %>
-        This shop uses social login for your convenience,
-        <a href="/site/en_us.html" target="_blank">know why</a>
-        social login is safer and more practical
+        This shop uses social login for <b>your security and convenience</b>,
+        <a href="/site/en_us.html" target="_blank">learn more</a>
       <% } %>
+    </p>
+
+    <p>
+      <i class="fas fa-lock"></i>
     </p>
   </body>
 </html>
