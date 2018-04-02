@@ -23,7 +23,7 @@
         padding: 20px;
       }
       #box > div {
-        max-width: 400px;
+        max-width: 300px;
         margin: 0 auto;
       }
       #box > div > div {
@@ -35,12 +35,14 @@
         margin-bottom: 7px;
         white-space: nowrap;
         border-radius: 3px;
-        box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
+        box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.1);
         text-transform: none;
         text-decoration: none;
         border-width: 1px;
         border-style: solid;
         color: #fff;
+        -webkit-transition: 1s;
+        transition: 1s;
       }
       #box > div > a > span {
         display: inline-block;
@@ -52,13 +54,25 @@
         background: #3b5999;
         border-color: #2f4d8a;
       }
+      .facebook:hover {
+        background: #274480;
+        border-color: #274480;
+      }
       .google {
         background: #cb4023;
         border-color: #be3419;
       }
+      .google:hover {
+        background: #c1361a;
+        border-color: #c1361a;
+      }
       .windows {
         background: #329ffc;
         border-color: #2996f2;
+      }
+      .windows:hover {
+        background: #1f8ce9;
+        border-color: #1f8ce9;
       }
     </style>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/all.css" integrity="sha384-5SOiIsAziJl6AWe0HWRKTXlfcSHKmYV4RBF18PPJ173Kzn7jzMyFuTtk8JA7QQG1" crossorigin="anonymous">
@@ -70,7 +84,7 @@
         <div>Store name</div>
         <a class="facebook" href="facebook">
           <span>
-            <i class="fab fa-facebook-square"></i>
+            <i class="fab fa-facebook-f"></i>
           </span>
           <% if (lang === 'pt_br') { %>
             Entrar com Facebook
