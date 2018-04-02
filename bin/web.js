@@ -137,19 +137,44 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       if (idValidate(id, res) === true) {
         // start login flow
         let storeId = parseInt(req.params.store, 10)
-        // get store info
+        let callback = (err, body) => {
+          if (!err && typeof body === 'object' && body !== null) {
+            // create session cookies
+            let sig = Math.floor((Math.random() * 10000000) + 10000000)
+            res.cookie('_passport_' + storeId + '_sig', sig, cookieOptions)
 
-        // create session cookies
-        let sig = Math.floor((Math.random() * 10000000) + 10000000)
-        res.cookie('_passport_' + storeId + '_sig', sig, cookieOptions)
-        let lang = req.params.lang
-        let oauthPath = '/' + storeId + '/' + id + '/' + sig + '/oauth'
-        let baseUri = config.baseUri
-        let providers = Object.assign({}, config.strategies)
-        let store = {
-          'id': storeId
+            let lang = req.params.lang
+            let oauthPath = '/' + storeId + '/' + id + '/' + sig + '/oauth'
+            let baseUri = config.baseUri
+
+            let providers = Object.assign({}, config.strategies)
+            // ref.: https://ecomstore.docs.apiary.io/#reference/stores/store-object
+            let store = {
+              'id': storeId,
+              'name': body.name
+            }
+            if (typeof body.logo === 'object' && body.logo !== null) {
+              store.logo = body.logo.url
+            }
+            // check custom store strategies
+            let customProviders = body.oauth_providers
+            if (typeof customProviders === 'object' && customProviders !== null) {
+              for (let provider in customProviders) {
+                if (customProviders.hasOwnProperty(provider) && providers.hasOwnProperty(provider)) {
+                  // mark custom store oauth app
+                  providers[provider].customStrategy = true
+                }
+              }
+            }
+
+            res.render('login', { lang, store, baseUri, oauthPath, providers })
+          } else {
+            res.status(404).send('Store not found')
+          }
         }
-        res.render('login', { lang, store, baseUri, oauthPath, providers })
+
+        // get store info
+        api.readStore(storeId, callback)
       }
     })
 
