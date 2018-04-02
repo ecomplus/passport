@@ -17,14 +17,34 @@
         color: #343a40;
         font-size: 17px;
         font-weight: 400;
+        padding: 15px;
+        margin: 0;
+      }
+      body > * {
+        max-width: 100%;
+        width: 300px;
+        margin: 0 auto;
+      }
+      body > p {
+        margin: 15px auto 0 auto;
+        text-align: center;
+        font-size: 13px;
+      }
+      body > p a {
+        text-decoration: none;
+        color: #e83e8c;
+      }
+      body > p a:hover {
+        color: #c11a69;
       }
       #box {
-        max-width: 100%;
         padding: 20px;
+        background: #fff;
+        border-radius: 3px;
+        box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
       }
       #box > div {
-        max-width: 300px;
-        margin: 0 auto;
+        width: 100%;
       }
       #box > div > div {
         margin-bottom: 20px;
@@ -35,7 +55,7 @@
         margin-bottom: 7px;
         white-space: nowrap;
         border-radius: 3px;
-        box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.1);
+        box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
         text-transform: none;
         text-decoration: none;
         border-width: 1px;
@@ -82,6 +102,7 @@
     <div id="box">
       <div>
         <div>Store name</div>
+
         <a class="facebook" href="facebook">
           <span>
             <i class="fab fa-facebook-f"></i>
@@ -114,5 +135,15 @@
         </a>
       </div>
     </div>
+
+    <p>
+      <% if (lang === 'pt_br') { %>
+        Esta loja utiliza login social para sua comodidade, saiba
+        <a href="/" target="_blank">porque o login social é mais seguro e prático</a>
+      <% } else { %>
+        This shop uses social login for your convenience,
+        <a href="/en_us.html" target="_blank">know why social login is safer and more practical</a>
+      <% } %>
+    </p>
   </body>
 </html>
