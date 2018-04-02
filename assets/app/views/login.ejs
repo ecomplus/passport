@@ -16,6 +16,7 @@
         font-family: Arial, Helvetica, sans-serif;
         color: #343a40;
         font-size: 17px;
+        font-weight: 400;
       }
       body > div {
         max-width: 400px;
@@ -38,9 +39,20 @@
         border-style: solid;
         color: #fff;
       }
+      body > div > a > i {
+        margin-right: 10px;
+      }
       .facebook {
         background: #3b5999;
         border-color: #2f4d8a;
+      }
+      .google {
+        background: #cb4023;
+        border-color: #be3419;
+      }
+      .windows {
+        background: #329ffc;
+        border-color: #2996f2;
       }
     </style>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/all.css" integrity="sha384-5SOiIsAziJl6AWe0HWRKTXlfcSHKmYV4RBF18PPJ173Kzn7jzMyFuTtk8JA7QQG1" crossorigin="anonymous">
@@ -49,9 +61,30 @@
   <body>
     <div>
       <div>Store name</div>
-      <a class="facebook" href="facebook"><i class="fab fa-facebook-square"></i> Facebook</a>
-      <a href="google">Google</a>
-      <a href="windowslive">Windows</a>
+      <a class="facebook" href="facebook">
+        <i class="fab fa-facebook-square"></i>
+        <% if (lang === 'pt_br') { %>
+          Entrar com Facebook
+        <% } else { %>
+          Login with Facebook
+        <% } %>
+      </a>
+      <a class="google" href="google">
+        <i class="fab fa-google"></i>
+        <% if (lang === 'pt_br') { %>
+          Entrar com Google
+        <% } else { %>
+          Login with Google
+        <% } %>
+      </a>
+      <a class="windows" href="windowslive">
+        <i class="fab fa-windows"></i>
+        <% if (lang === 'pt_br') { %>
+          Entrar com Windows
+        <% } else { %>
+          Login with Windows
+        <% } %>
+      </a>
     </div>
   </body>
 </html>
