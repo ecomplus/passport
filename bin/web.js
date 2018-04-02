@@ -131,7 +131,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       res.status(400).send('Invalid request ID, must follow RegEx pattern ^[\\w.]{32}$')
     }
 
-    app.get(config.baseUri + ':store/:id/login.html', (req, res) => {
+    app.get(config.baseUri + ':lang/:store/:id/login.html', (req, res) => {
       // check id
       let id = req.params.id
       if (idValidate(id, res) === true) {
@@ -142,8 +142,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
         // create session cookies
         let sig = Math.floor((Math.random() * 10000000) + 10000000)
         res.cookie('_passport_' + store + '_sig', sig, cookieOptions)
-        let lang = 'en_us'
-        res.render('login', { lang, sig, id, store })
+        let lang = req.params.lang
+        let oauthPath = '/oauth/' + store + '/' + id + '/' + sig
+        res.render('login', { lang, store, oauthPath })
       }
     })
 
