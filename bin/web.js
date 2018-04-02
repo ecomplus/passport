@@ -143,8 +143,10 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
         let sig = Math.floor((Math.random() * 10000000) + 10000000)
         res.cookie('_passport_' + store + '_sig', sig, cookieOptions)
         let lang = req.params.lang
-        let oauthPath = '/oauth/' + store + '/' + id + '/' + sig
-        res.render('login', { lang, store, oauthPath })
+        let oauthPath = '/' + store + '/' + id + '/' + sig + '/oauth'
+        let baseUri = config.baseUri
+        let providers = config.strategies
+        res.render('login', { lang, store, baseUri, oauthPath, providers })
       }
     })
 
