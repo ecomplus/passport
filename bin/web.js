@@ -137,7 +137,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       if (idValidate(id, res) === true) {
         // start login flow
         let storeId = parseInt(req.params.store, 10)
-        // check store
+        // get store info
 
         // create session cookies
         let sig = Math.floor((Math.random() * 10000000) + 10000000)
