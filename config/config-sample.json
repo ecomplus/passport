@@ -5,15 +5,24 @@
   "strategies": {
     "facebook": {
       "clientID": "",
-      "clientSecret": ""
+      "clientSecret": "",
+      "providerName": "Facebook",
+      "htmlClass": "facebook",
+      "faIcon": "fa-facebook-f"
     },
     "google": {
       "clientID": "",
-      "clientSecret": ""
+      "clientSecret": "",
+      "providerName": "Google",
+      "htmlClass": "google",
+      "faIcon": "fa-google"
     },
     "windowslive": {
       "clientID": "",
-      "clientSecret": ""
+      "clientSecret": "",
+      "providerName": "Windows",
+      "htmlClass": "windows",
+      "faIcon": "fa-windows"
     }
   },
   "jwtSecret": "abcdef",
