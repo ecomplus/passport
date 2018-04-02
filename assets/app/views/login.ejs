@@ -56,8 +56,15 @@
       #box > div {
         width: 100%;
       }
-      #box > div > div {
-        margin-bottom: 20px;
+      #box > div > div,
+      #box > div > img {
+        margin-bottom: 15px;
+      }
+      #box > div > img {
+        width: auto;
+        max-width: 100%;
+        height: auto;
+        display: block;
       }
       #box > div > a {
         display: block;
@@ -109,7 +116,11 @@
   <body>
     <div id="box">
       <div>
-        <div>Store name</div>
+        <% if (store.logo) { %>
+          <img src="<%= store.logo %>" />
+        <% } else { %>
+          <div><%= store.name %></div>
+        <% } %>
         <% for (var strategy in providers) { %>
           <% if (providers.hasOwnProperty(strategy)) { %>
             <% var provider = providers[strategy]; %>
@@ -134,10 +145,10 @@
     </div>
     <p>
       <% if (lang === 'pt_br') { %>
-        Esta loja utiliza login social para <b>sua segurança e praticidade</b>,
+        Usamos login social para <b>sua segurança e conveniência</b>,
         <a href="/site/" target="_blank">saiba mais</a>
       <% } else { %>
-        This shop uses social login for <b>your security and convenience</b>,
+        We use social login for <b>your security and convenience</b>,
         <a href="/site/en_us.html" target="_blank">learn more</a>
       <% } %>
     </p>

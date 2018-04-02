@@ -136,16 +136,19 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       let id = req.params.id
       if (idValidate(id, res) === true) {
         // start login flow
-        let store = parseInt(req.params.store, 10)
+        let storeId = parseInt(req.params.store, 10)
         // check store
 
         // create session cookies
         let sig = Math.floor((Math.random() * 10000000) + 10000000)
-        res.cookie('_passport_' + store + '_sig', sig, cookieOptions)
+        res.cookie('_passport_' + storeId + '_sig', sig, cookieOptions)
         let lang = req.params.lang
-        let oauthPath = '/' + store + '/' + id + '/' + sig + '/oauth'
+        let oauthPath = '/' + storeId + '/' + id + '/' + sig + '/oauth'
         let baseUri = config.baseUri
         let providers = Object.assign({}, config.strategies)
+        let store = {
+          'id': storeId
+        }
         res.render('login', { lang, store, baseUri, oauthPath, providers })
       }
     })
