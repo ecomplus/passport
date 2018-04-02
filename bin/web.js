@@ -91,9 +91,14 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     app.use(bodyParser.json())
     app.use(cookieParser())
 
-    // static E-Com Plus Passport web app
-    app.get('/', Express.static(root + '/assets/app'))
-    // static website
+    // set the view engine to ejs
+    app.set('views', root + '/assets/app/views')
+    app.set('view engine', 'ejs')
+
+    app.get('/', (req, res) => {
+      res.redirect('/site/')
+    })
+    // static E-Com Plus Passport website
     app.use('/site', Express.static(root + '/assets/site'))
 
     // keep id and token on cookies
@@ -112,12 +117,28 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       res.json(availableStrategies)
     })
 
+    let idValidate = (id, res) => {
+      if (/^[\w.]{32}$/.test(id)) {
+        return true
+      }
+      // invalid ID, end request
+      res.status(400).send('Invalid request ID, must follow RegEx pattern ^[\\w.]{32}$')
+    }
+
     app.get(config.baseUri + ':store/:id/login.html', (req, res) => {
-      // start login flow
-      let store = parseInt(req.params.store, 10)
-      // create session cookies
-      let sig = Math.floor((Math.random() * 10000000) + 10000000)
-      res.cookie('_passport_' + store + '_sig', sig, cookieOptions)
+      // check id
+      let id = req.params.id
+      if (idValidate(id, res) === true) {
+        // start login flow
+        let store = parseInt(req.params.store, 10)
+        // check store
+
+        // create session cookies
+        let sig = Math.floor((Math.random() * 10000000) + 10000000)
+        res.cookie('_passport_' + store + '_sig', sig, cookieOptions)
+        let lang = 'en_us'
+        res.render('login', { lang, sig, id, store })
+      }
     })
 
     let oauthStart = (req, res, next) => {
@@ -126,7 +147,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       let store = parseInt(req.params.store, 10)
       if (store > 100) {
         // check id
-        if (/^[\w.]{32}$/.test(req.params.id)) {
+        if (idValidate(req.params.id, res) === true) {
           // check session
           if (req.cookies['_passport_' + store + '_sig'] === req.params.sig) {
             // create id and store cookies
@@ -139,8 +160,6 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           } else {
             res.status(400).send('Invalid session, restart flow at login.html')
           }
-        } else {
-          res.status(400).send('Invalid request ID, must follow RegEx pattern ^[\\w.]{32}$')
         }
       } else {
         res.status(400).send('Invalid Store ID')
