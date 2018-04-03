@@ -39,6 +39,6 @@ if (window.focus) {
 }
 // public callback function
 window.passportCallback = function () {
-  // console.log('loged')
+  // console.log('logged')
 }
 ```
