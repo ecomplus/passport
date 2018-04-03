@@ -33,7 +33,7 @@ proxy passing the requests to configured TCP port.
 
 ```javascript
 var uri = 'https://passport.e-com.plus/v1/pt_br/1004/sdjcksadcasbcsabdcbsldjlbcasbdcs/login.html'
-var popup = window.open(uri, 'Passport', 'height=300,width=200')
+var popup = window.open(uri, 'Passport', 'height=400,width=340')
 if (window.focus) {
   popup.focus()
 }
