@@ -2,6 +2,9 @@
 <html>
 <body>
 <script type="text/javascript">
+if (window.opener && typeof window.opener.passportCallback === 'function') {
+  window.opener.passportCallback();
+}
 setTimeout(function () {
   window.close();
 }, 100);
