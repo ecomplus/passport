@@ -32,8 +32,8 @@ proxy passing the requests to configured TCP port.
 ## Example
 
 ```javascript
-let uri = 'https://passport.e-com.plus/v1/pt_br/1004/sdjcksadcasbcsabdcbsldjlbcasbdcs/login.html'
-let popup = window.open(uri, 'Passport', 'height=300,width=200')
+var uri = 'https://passport.e-com.plus/v1/pt_br/1004/sdjcksadcasbcsabdcbsldjlbcasbdcs/login.html'
+var popup = window.open(uri, 'Passport', 'height=300,width=200')
 if (window.focus) {
   popup.focus()
 }
