@@ -37,7 +37,8 @@ var popup = window.open(uri, 'Passport', 'height=400,width=340')
 if (window.focus) {
   popup.focus()
 }
-popup.onunload = function () {
-  // run ajax to get token
+// public callback function
+window.passportCallback = function () {
+  // console.log('loged')
 }
 ```
