@@ -334,11 +334,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     let setupStrategy = (credentials, provider, Strategy, storeId) => {
       if (typeof credentials === 'object' && credentials !== null && credentials.clientID !== '') {
         let endpoint = provider
-        let callbackPath = config.baseUri + provider
         if (storeId) {
+          // add store ID on strategy endpoint
           endpoint += '-' + storeId
-          // add store ID as URL param
-          callbackPath += '-:store(' + storeId + ')'
         }
         let path = config.baseUri + endpoint
 
@@ -373,13 +371,18 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           options.scope = Strategy.scope
         }
 
-        app.get(path + '/:store/:id/:sig/oauth', oauthStart, passport.authenticate(endpoint, options))
-        app.get(callbackPath + '/callback.html', passport.authenticate(endpoint, options), oauthCallback)
-
+        let strategyAuthenticate = passport.authenticate(endpoint, options)
         if (!storeId) {
           // generic only
+          app.get(path + '/:store/:id/:sig/oauth', oauthStart, strategyAuthenticate)
+          app.get(path + '/callback.html', strategyAuthenticate, oauthCallback)
           app.get(path + '(-*)?/:store/:id/token.json', oauthProfile)
+
           availableStrategies.push(provider)
+        } else {
+          // save authenticate function
+          // will be used on custom strategies route
+          customStrategies[storeId].authenticate[provider] = strategyAuthenticate
         }
       }
     }
@@ -413,14 +416,34 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                     for (let provider in providers) {
                       if (providers.hasOwnProperty(provider)) {
                         let app = providers[provider]
-                        let Strategy = Strategies[provider]
-                        if (app && Strategy !== undefined && app.client_id && app.client_secret) {
-                          // setup strategy with store custom oauth app
-                          let credentials = {
-                            'clientID': app.client_id,
-                            'clientSecret': app.client_secret
+                        if (app && app.client_id && app.client_secret) {
+                          // check if it is already setted
+                          let storeStrategies = customStrategies[storeId]
+                          let key = app.client_id + app.client_secret
+                          if (storeStrategies) {
+                            if (storeStrategies[provider] === key) {
+                              // already setted
+                              // skip
+                              continue
+                            }
+                          } else {
+                            customStrategies[storeId] = {
+                              // keep providers authenticate functions
+                              'authenticate': {}
+                            }
                           }
-                          setupStrategy(credentials, provider, Strategy, storeId)
+
+                          let Strategy = Strategies[provider]
+                          if (Strategy !== undefined) {
+                            // setup strategy with store custom oauth app
+                            let credentials = {
+                              'clientID': app.client_id,
+                              'clientSecret': app.client_secret
+                            }
+                            setupStrategy(credentials, provider, Strategy, storeId)
+                            // save for further check
+                            customStrategies[storeId][provider] = key
+                          }
                         }
                       }
                     }
@@ -439,7 +462,45 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
         })
       }, 600000)
     }
+    // store custom strategies already setted
+    let customStrategies = {}
     setupCustomStrategies()
+
+    // route custom strategies
+    app.get(config.baseUri + ':provider(*)-:store(*)/:st/:id/:sig/oauth', (req, res, next) => {
+      let store = req.params.store
+      // check if store ID match twice on URL
+      if (store === req.params.st) {
+        let storeStrategies = customStrategies[store]
+        let provider = req.params.provider
+        // check if custom strategy is setted up
+        if (storeStrategies && storeStrategies[provider]) {
+          // continue as express middlewares
+          oauthStart(req, res, () => {
+            storeStrategies.authenticate[provider](req, res, next)
+          })
+          return
+        }
+      }
+      // nothing to do, pass to next middleware
+      next()
+    })
+
+    app.get(config.baseUri + ':provider(*)-:store(*)/callback.html', (req, res, next) => {
+      let store = req.params.store
+      let storeStrategies = customStrategies[store]
+      let provider = req.params.provider
+      // check if custom strategy is setted up
+      if (storeStrategies && storeStrategies[provider]) {
+        // continue as express middlewares
+        storeStrategies.authenticate[provider](req, res, () => {
+          oauthCallback(req, res, next)
+        })
+        return
+      }
+      // nothing to do, pass to next middleware
+      next()
+    })
 
     // handle OAuth errors
     app.use(/.*\/(callback\.html|oauth)$/, (err, req, res, next) => {
