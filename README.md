@@ -37,8 +37,21 @@ var popup = window.open(uri, 'Passport', 'height=400,width=340')
 if (window.focus) {
   popup.focus()
 }
+var getCustomerInfo = function () {
+  // run after login
+  clearInterval(popupWatch)
+  console.log('logged?')
+}
 // public callback function
 window.passportCallback = function () {
-  // console.log('logged')
+  // logged
+  getCustomerInfo()
 }
+// fallback
+var popupWatch = setInterval(function () {
+  if (popup.closed) {
+    // may be logged
+    getCustomerInfo()
+  }
+}, 400)
 ```
