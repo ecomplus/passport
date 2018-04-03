@@ -3,7 +3,12 @@
 <body>
 <script type="text/javascript">
 if (window.opener && typeof window.opener.passportCallback === 'function') {
-  window.opener.passportCallback();
+  try {
+    window.opener.passportCallback();
+  } catch (err) {
+    // probably cross origin error
+    console.error(err);
+  }
 }
 setTimeout(function () {
   window.close();
