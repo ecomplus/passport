@@ -376,7 +376,6 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           // generic only
           app.get(path + '/:store/:id/:sig/oauth', oauthStart, strategyAuthenticate)
           app.get(path + '/callback.html', strategyAuthenticate, oauthCallback)
-          app.get(path + '(-*)?/:store/:id/token.json', oauthProfile)
 
           availableStrategies.push(provider)
         } else {
@@ -386,6 +385,10 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
         }
       }
     }
+
+    // endpoint to profile
+    // should work with or without provider on URI
+    app.get(config.baseUri + '(*/)?:store/:id/token.json', oauthProfile)
 
     for (let provider in strategies) {
       if (Strategies.hasOwnProperty(provider) && strategies.hasOwnProperty(provider)) {
