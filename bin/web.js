@@ -19,6 +19,10 @@ const Express = require('express')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 
+// Redis database
+// https://github.com/NodeRedis/node_redis
+const redisClient = require('redis').createClient()
+
 // Passport and strategies
 // http://www.passportjs.org/
 const passport = require('passport')
@@ -111,9 +115,8 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     let cookieOptions = {
       // browser session only
       'expires': 0,
-      // cookie accessible not only by the web server
-      'httpOnly': false,
-      'hostOnly': false
+      // cookie only accessible by the web server
+      'httpOnly': true
     }
 
     // initialize OAuth strategies
@@ -227,11 +230,12 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           }
 
           if (profile) {
-            // create profile cookie
-            let options = Object.assign({}, cookieOptions)
-            // also limit cookie age to 2 minutes
-            options.maxAge = 120000
-            res.cookie('_passport_' + store + '_profile', profile, options)
+            let id = req.cookies['_passport_' + store + '_id']
+            if (idValidate(id, res) === true) {
+              // save profile on redis
+              // key will expire after 2 minutes
+              redisClient.set(store + '_' + id, profile, 'EX', 120)
+            }
           }
         }
       }
@@ -243,95 +247,102 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     let oauthProfile = (req, res, next) => {
       // check if id is the same of stored
       let store = parseInt(req.params.store, 10)
-      let cookieName = '_passport_' + store
       let id = req.params.id
 
       if (store > 100) {
-        if (id === req.cookies[cookieName + '_id']) {
-          // valid id
-          // get user profile
-          let profile = req.cookies[cookieName + '_profile']
-          if (profile) {
-            // remove cookies
-            res.clearCookie(cookieName + '_id')
-            res.clearCookie(cookieName + '_profile')
-
-            try {
-              profile = JSON.parse(profile)
-            } catch (e) {
-              // invalid JSON
-              res.status(403).json({
-                'status': 403,
-                'error': 'Forbidden, invalid profile object, restart the OAuth flux'
+        redisClient.get(store + '_' + id, (err, profile) => {
+          if (!err) {
+            // reply is null when the key is missing
+            if (profile === null) {
+              res.status(401).json({
+                'status': 401,
+                'error': 'Unauthorized, request ID (' + id + ') doesn\'t match'
               })
-              return
-            }
+            } else {
+              // valid id
+              // get user profile
+              if (profile) {
+                // remove cookies
+                res.clearCookie('_passport_' + store + '_id')
 
-            let returnToken = (customer) => {
-              let out = {
-                // returns only public info
-                'customer': customer,
-                // generate jwt
-                'auth': {
-                  'id': customer._id,
-                  'token': auth.generateToken(store, customer._id)
-                }
-              }
-              res.json(out)
-            }
-
-            let handleError = (msg) => {
-              if (msg) {
-                res.status(400).json({
-                  'status': 400,
-                  'error': msg
-                })
-              } else {
-                res.status(500).json({
-                  'status': 500,
-                  'error': 'Internal server error'
-                })
-              }
-            }
-
-            // find or create customer account
-            let verifiedEmail
-            if (Array.isArray(profile.emails) && profile.emails.length > 0) {
-              // also search customer by email
-              verifiedEmail = profile.emails[0].value
-            }
-
-            let callback = (err, customer, msg) => {
-              if (!err) {
-                if (customer) {
-                  returnToken(customer)
-                } else {
-                  // no account found
-                  api.createCustomer(store, profile, (err, customer, msg) => {
-                    if (err) {
-                      handleError(msg)
-                    } else {
-                      returnToken(customer)
-                    }
+                try {
+                  profile = JSON.parse(profile)
+                } catch (e) {
+                  // invalid JSON
+                  res.status(403).json({
+                    'status': 403,
+                    'error': 'Forbidden, invalid profile object, restart the OAuth flux'
                   })
+                  return
                 }
+
+                let returnToken = (customer) => {
+                  let out = {
+                    // returns only public info
+                    'customer': customer,
+                    // generate jwt
+                    'auth': {
+                      'id': customer._id,
+                      'token': auth.generateToken(store, customer._id)
+                    }
+                  }
+                  res.json(out)
+                }
+
+                let handleError = (msg) => {
+                  if (msg) {
+                    res.status(400).json({
+                      'status': 400,
+                      'error': msg
+                    })
+                  } else {
+                    res.status(500).json({
+                      'status': 500,
+                      'error': 'Internal server error'
+                    })
+                  }
+                }
+
+                // find or create customer account
+                let verifiedEmail
+                if (Array.isArray(profile.emails) && profile.emails.length > 0) {
+                  // also search customer by email
+                  verifiedEmail = profile.emails[0].value
+                }
+
+                let callback = (err, customer, msg) => {
+                  if (!err) {
+                    if (customer) {
+                      returnToken(customer)
+                    } else {
+                      // no account found
+                      api.createCustomer(store, profile, (err, customer, msg) => {
+                        if (err) {
+                          handleError(msg)
+                        } else {
+                          returnToken(customer)
+                        }
+                      })
+                    }
+                  } else {
+                    handleError(msg)
+                  }
+                }
+                api.findCustomer(store, profile.provider, profile.id, verifiedEmail, callback)
               } else {
-                handleError(msg)
+                res.status(403).json({
+                  'status': 403,
+                  'error': 'Forbidden, no profile found, restart the OAuth flux'
+                })
               }
             }
-            api.findCustomer(store, profile.provider, profile.id, verifiedEmail, callback)
           } else {
-            res.status(403).json({
-              'status': 403,
-              'error': 'Forbidden, no profile found, restart the OAuth flux'
+            res.status(500).json({
+              'status': 500,
+              'error': 'Internal server error (Redis client)'
             })
           }
-        } else {
-          res.status(401).json({
-            'status': 401,
-            'error': 'Unauthorized, request ID (' + id + ') doesn\'t match'
-          })
-        }
+        })
       } else {
         res.status(401).json({
           'status': 401,
