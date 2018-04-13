@@ -243,90 +243,98 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       // check if id is the same of stored
       let store = parseInt(req.params.store, 10)
       let cookieName = '_passport_' + store
-      let id = req.cookies[cookieName + '_id']
-      if (store > 100 && id === req.params.id) {
-        // valid id
-        // get user profile
-        let profile = req.cookies[cookieName + '_profile']
-        if (profile) {
-          // remove cookies
-          res.clearCookie(cookieName + '_id')
-          res.clearCookie(cookieName + '_profile')
+      let id = req.params.id
 
-          try {
-            profile = JSON.parse(profile)
-          } catch (e) {
-            // invalid JSON
-            res.status(403).json({
-              'status': 403,
-              'error': 'Forbidden, invalid profile object, restart the OAuth flux'
-            })
-            return
-          }
+      if (store > 100) {
+        if (id === req.cookies[cookieName + '_id']) {
+          // valid id
+          // get user profile
+          let profile = req.cookies[cookieName + '_profile']
+          if (profile) {
+            // remove cookies
+            res.clearCookie(cookieName + '_id')
+            res.clearCookie(cookieName + '_profile')
 
-          let returnToken = (customer) => {
-            let out = {
-              // returns only public info
-              'customer': customer,
-              // generate jwt
-              'auth': {
-                'id': customer._id,
-                'token': auth.generateToken(store, customer._id)
+            try {
+              profile = JSON.parse(profile)
+            } catch (e) {
+              // invalid JSON
+              res.status(403).json({
+                'status': 403,
+                'error': 'Forbidden, invalid profile object, restart the OAuth flux'
+              })
+              return
+            }
+
+            let returnToken = (customer) => {
+              let out = {
+                // returns only public info
+                'customer': customer,
+                // generate jwt
+                'auth': {
+                  'id': customer._id,
+                  'token': auth.generateToken(store, customer._id)
+                }
               }
+              res.json(out)
             }
-            res.json(out)
-          }
 
-          let handleError = (msg) => {
-            if (msg) {
-              res.status(400).json({
-                'status': 400,
-                'error': msg
-              })
-            } else {
-              res.status(500).json({
-                'status': 500,
-                'error': 'Internal server error'
-              })
-            }
-          }
-
-          // find or create customer account
-          let verifiedEmail
-          if (Array.isArray(profile.emails) && profile.emails.length > 0) {
-            // also search customer by email
-            verifiedEmail = profile.emails[0].value
-          }
-
-          let callback = (err, customer, msg) => {
-            if (!err) {
-              if (customer) {
-                returnToken(customer)
+            let handleError = (msg) => {
+              if (msg) {
+                res.status(400).json({
+                  'status': 400,
+                  'error': msg
+                })
               } else {
-                // no account found
-                api.createCustomer(store, profile, (err, customer, msg) => {
-                  if (err) {
-                    handleError(msg)
-                  } else {
-                    returnToken(customer)
-                  }
+                res.status(500).json({
+                  'status': 500,
+                  'error': 'Internal server error'
                 })
               }
-            } else {
-              handleError(msg)
             }
+
+            // find or create customer account
+            let verifiedEmail
+            if (Array.isArray(profile.emails) && profile.emails.length > 0) {
+              // also search customer by email
+              verifiedEmail = profile.emails[0].value
+            }
+
+            let callback = (err, customer, msg) => {
+              if (!err) {
+                if (customer) {
+                  returnToken(customer)
+                } else {
+                  // no account found
+                  api.createCustomer(store, profile, (err, customer, msg) => {
+                    if (err) {
+                      handleError(msg)
+                    } else {
+                      returnToken(customer)
+                    }
+                  })
+                }
+              } else {
+                handleError(msg)
+              }
+            }
+            api.findCustomer(store, profile.provider, profile.id, verifiedEmail, callback)
+          } else {
+            res.status(403).json({
+              'status': 403,
+              'error': 'Forbidden, no profile found, restart the OAuth flux'
+            })
           }
-          api.findCustomer(store, profile.provider, profile.id, verifiedEmail, callback)
         } else {
-          res.status(403).json({
-            'status': 403,
-            'error': 'Forbidden, no profile found, restart the OAuth flux'
+          res.status(401).json({
+            'status': 401,
+            'error': 'Unauthorized, request ID (' + id + ') doesn\'t match'
           })
         }
       } else {
         res.status(401).json({
           'status': 401,
-          'error': 'Unauthorized, request ID doesn\'t match'
+          'error': 'Unauthorized, invalid store ID: ' + store
         })
       }
     }
