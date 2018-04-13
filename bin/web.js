@@ -111,8 +111,8 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     let cookieOptions = {
       // browser session only
       'expires': 0,
-      // cookie only accessible by the web server
-      'httpOnly': true
+      // cookie accessible not only by the web server
+      'httpOnly': false
     }
 
     // initialize OAuth strategies
