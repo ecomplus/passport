@@ -45,7 +45,7 @@ module.exports = (app, baseUri) => {
   // complete base URI
   baseUri = baseUri + ':store/api'
 
-  app.use(baseUri + '/*', (req, res, next) => {
+  app.use(baseUri + '/*.json', (req, res, next) => {
     // authenticate
     let accessToken = req.get('X-Access-Token')
     let customerId = req.get('X-My-ID')
@@ -100,17 +100,22 @@ module.exports = (app, baseUri) => {
     }
   })
 
-  app.use(baseUri + '/:resource/:id.json', (req, res, next) => {
+  app.use(baseUri + '/:resource/:id(/:subresource(/:subid(/:third)?)?)?.json', (req, res) => {
     // treat API endpoints
     switch (req.params.resource) {
-      case 'me':
-        // customer resource
+      case 'carts':
+      case 'orders':
+        res.json({
+          'status': 200
+        })
         break
-      case 'cart':
-      case 'order':
-        break
+
       default:
-        next()
+        res.status(404).json({
+          'status': 404,
+          'error_code': 1104,
+          'error': 'Not found, invalid API resource'
+        })
     }
   })
 }
