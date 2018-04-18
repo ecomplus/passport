@@ -7,9 +7,18 @@ const auth = require('./../lib/Auth.js')
 // methods to Store API
 const api = require('./../lib/Api.js')
 
+const sendError = (res, status, code, msg) => {
+  // error response
+  res.status(status).json({
+    'status': status,
+    'error_code': code,
+    'message': msg
+  })
+}
+
 const Callback = (res) => {
   // api requests callback
-  return (err, body) => {
+  return (err, body, errMsg) => {
     if (!err) {
       switch (body) {
         case true:
@@ -20,23 +29,18 @@ const Callback = (res) => {
 
         case false:
           // unauthorized
-          res.status(401).json({
-            'status': 401,
-            'error_code': 1100,
-            'message': 'Unauthorized, customer is not related with this object'
-          })
+          sendError(res, 401, 1100, 'Unauthorized, customer is not related with this object')
           break
 
         default:
           // response with JSON object
           res.json(body)
       }
+    } else if (errMsg) {
+      // pass error exposed by Store API
+      sendError(res, 400, 1300, errMsg)
     } else {
-      res.status(500).json({
-        'status': 500,
-        'error_code': 1200,
-        'message': 'Internal error, try again later'
-      })
+      sendError(res, 500, 1200, 'Internal error, try again later')
     }
   }
 }
@@ -61,19 +65,12 @@ module.exports = (app, baseUri) => {
         next()
       } else {
         // unauthorized
-        res.status(401).json({
-          'status': 401,
-          'error_code': 800 + Auth.error,
-          'message': Auth.message
-        })
+        sendError(res, 401, 800 + Auth.error, Auth.message)
       }
     } else {
       // forbidden
-      res.status(403).json({
-        'status': 403,
-        'error_code': 800,
-        'message': 'It is necessary to provide valid customer ID (X-My-ID) and token (X-Access-Token)'
-      })
+      let errMsg = 'It is necessary to provide valid customer ID (X-My-ID) and token (X-Access-Token)'
+      sendError(res, 403, 800, errMsg)
     }
   })
 
@@ -92,11 +89,7 @@ module.exports = (app, baseUri) => {
         break
 
       default:
-        res.status(405).json({
-          'status': 405,
-          'error_code': 1401,
-          'message': 'Method not allowed, you can only read (GET) and edit (PATCH)'
-        })
+        sendError(res, 405, 1401, 'Method not allowed, you can only read (GET) and edit (PATCH)')
     }
   })
 
@@ -111,11 +104,7 @@ module.exports = (app, baseUri) => {
         break
 
       default:
-        res.status(404).json({
-          'status': 404,
-          'error_code': 1104,
-          'message': 'Not found, invalid API resource'
-        })
+        sendError(res, 404, 1104, 'Not found, invalid API resource')
     }
   })
 }
