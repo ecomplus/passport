@@ -38,7 +38,7 @@ const Callback = (res) => {
       }
     } else if (errMsg) {
       // pass error exposed by Store API
-      sendError(res, 400, 1300, errMsg)
+      sendError(res, 400, 1300, errMsg.en_us)
     } else {
       sendError(res, 500, 1200, 'Internal error, try again later')
     }
