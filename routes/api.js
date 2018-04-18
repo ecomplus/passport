@@ -23,7 +23,7 @@ const Callback = (res) => {
           res.status(401).json({
             'status': 401,
             'error_code': 1100,
-            'error': 'Unauthorized, customer is not related with this object'
+            'message': 'Unauthorized, customer is not related with this object'
           })
           break
 
@@ -35,7 +35,7 @@ const Callback = (res) => {
       res.status(500).json({
         'status': 500,
         'error_code': 1200,
-        'error': 'Internal error, try again later'
+        'message': 'Internal error, try again later'
       })
     }
   }
@@ -64,7 +64,7 @@ module.exports = (app, baseUri) => {
         res.status(401).json({
           'status': 401,
           'error_code': 800 + Auth.error,
-          'error': Auth.message
+          'message': Auth.message
         })
       }
     } else {
@@ -72,7 +72,7 @@ module.exports = (app, baseUri) => {
       res.status(403).json({
         'status': 403,
         'error_code': 800,
-        'error': 'It is necessary to provide valid customer ID (X-My-ID) and token (X-Access-Token)'
+        'message': 'It is necessary to provide valid customer ID (X-My-ID) and token (X-Access-Token)'
       })
     }
   })
@@ -95,7 +95,7 @@ module.exports = (app, baseUri) => {
         res.status(405).json({
           'status': 405,
           'error_code': 1401,
-          'error': 'Method not allowed, you can only read (GET) and edit (PATCH)'
+          'message': 'Method not allowed, you can only read (GET) and edit (PATCH)'
         })
     }
   })
@@ -114,7 +114,7 @@ module.exports = (app, baseUri) => {
         res.status(404).json({
           'status': 404,
           'error_code': 1104,
-          'error': 'Not found, invalid API resource'
+          'message': 'Not found, invalid API resource'
         })
     }
   })
