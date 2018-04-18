@@ -49,7 +49,7 @@ module.exports = (app, baseUri) => {
     // authenticate
     let accessToken = req.get('X-Access-Token')
     let customerId = req.get('X-My-ID')
-    let storeId = req.params.store
+    let storeId = parseInt(req.params.store, 10)
 
     if (accessToken && customerId) {
       // check token
