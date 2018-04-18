@@ -526,7 +526,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     })
 
     // open REST API
-    app.use(config.baseUri + 'api/:resource', require('./../middlewares/api.js'))
+    require('./../routes/api.js')(app, config.baseUri)
 
     // handle OAuth errors
     app.use(/.*\/(callback\.html|oauth)$/, (err, req, res, next) => {
