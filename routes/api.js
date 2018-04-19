@@ -101,7 +101,7 @@ module.exports = (app, baseUri) => {
     }
   })
 
-  app.use(baseUri + '/:endpoint(:resource(/:id(/:subresource(/:subid(/:third)?)?)?)?.json)', (req, res) => {
+  app.use(baseUri + '/:resource(/:id(/:subresource(/:subid(/:third)?)?)?)?.json', (req, res) => {
     // treat API endpoints
     switch (req.params.resource) {
       case 'carts':
