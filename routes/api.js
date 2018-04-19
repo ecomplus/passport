@@ -50,6 +50,14 @@ module.exports = (app, baseUri) => {
   baseUri = baseUri + ':store/api'
 
   app.use(baseUri + '/*.json', (req, res, next) => {
+    // check request body
+    if (req.body && (typeof req.body !== 'object' || Array.isArray(req.body))) {
+      // invalid body
+      let errMsg = 'Not acceptable, body content must be a valid JSON object'
+      sendError(res, 406, 799, errMsg)
+      return
+    }
+
     // authenticate
     let accessToken = req.get('X-Access-Token')
     let customerId = req.get('X-My-ID')
