@@ -101,9 +101,37 @@ module.exports = (app, baseUri) => {
     }
   })
 
-  app.use(baseUri + '/:resource(/:id(/:subresource(/:subid(/:third)?)?)?)?.json', (req, res) => {
+  app.use(baseUri + '/:resource([^/]+)(/:id)?(/:path)?.json', (req, res) => {
     // treat API endpoints
     switch (req.params.resource) {
+      case 'carts':
+      case 'orders':
+        let endpoint
+        if (!req.params.path) {
+          if (req.method !== 'DELETE') {
+            endpoint = null
+          } else {
+            sendError(res, 405, 1505, 'Method not allowed, you cannot delete resources here')
+            return
+          }
+        } else {
+          // mount endpoint parts
+          endpoint = req.params.resource + '/' + req.params.id + '/' + req.params.path + '.json'
+        }
+
+        // pass request to Store API
+        api.crud(
+          req.params.store,
+          req.customer,
+          req.method,
+          req.params.resource,
+          req.params.id,
+          endpoint,
+          req.body,
+          Callback(res)
+        )
+        break
+
       default:
         sendError(res, 404, 1504, 'Not found, invalid API resource')
     }
