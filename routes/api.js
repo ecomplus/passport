@@ -29,7 +29,8 @@ const Callback = (res) => {
 
         case false:
           // unauthorized
-          sendError(res, 401, 1100, 'Unauthorized, customer is not related with this object')
+          let errMsg = 'Prohibited endpoint or customer not related with respective object'
+          sendError(res, 401, 1100, errMsg)
           break
 
         default:
