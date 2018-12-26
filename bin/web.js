@@ -150,6 +150,8 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             let lang = req.params.lang
             let oauthPath = '/' + storeId + '/' + id + '/' + sig + '/oauth'
             let baseUri = config.baseUri
+            // show or hide link to skip login
+            let enableSkip = Boolean(req.query.enable_skip)
 
             let providers = Object.assign({}, config.strategies)
             // ref.: https://ecomstore.docs.apiary.io/#reference/stores/store-object
@@ -171,7 +173,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
               }
             }
 
-            res.render('login', { lang, store, baseUri, oauthPath, providers })
+            res.render('login', { lang, store, baseUri, enableSkip, oauthPath, providers })
           } else {
             res.status(404).send('Store not found')
           }

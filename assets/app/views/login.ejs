@@ -109,8 +109,19 @@
         background: #1f8ce9;
         border-color: #1f8ce9;
       }
+      #box > a {
+        text-decoration: none;
+        margin-top: 17px;
+        font-size: 15px;
+        display: block;
+        text-align: center;
+        color: #6c757d;
+      }
+      #box > a:hover {
+        color: #555;
+      }
     </style>
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/all.css" integrity="sha384-5SOiIsAziJl6AWe0HWRKTXlfcSHKmYV4RBF18PPJ173Kzn7jzMyFuTtk8JA7QQG1" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
   </head>
 
   <body>
@@ -142,6 +153,16 @@
           <% } %>
         <% } %>
       </div>
+      <% if (enableSkip) { %>
+        <a href="javascript:window.close();">
+          <i class="fas fa-arrow-alt-circle-left"></i>
+          <% if (lang === 'pt_br') { %>
+            Cadastrar manualmente na loja
+          <% } else { %>
+            Sign up manually on store
+          <% } %>
+        </a>
+      <% } %>
     </div>
     <p>
       <% if (lang === 'pt_br') { %>
