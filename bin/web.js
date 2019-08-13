@@ -222,7 +222,6 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
               }
             }
 
-            // res.render('login', { lang, store, baseUri, enableSkip, oauthPath, providers })
             res.send({
               baseUri: baseUri,
               providers: providers,
