@@ -184,6 +184,63 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       }
     })
 
+    app.get(config.baseUri + ':lang/:store/:id/rest', (req, res) => {
+      // check id
+      let id = req.params.id
+      if (idValidate(id, res) === true) {
+        // start login flow
+        let storeId = parseInt(req.params.store, 10)
+        let callback = (err, body) => {
+          if (!err && typeof body === 'object' && body !== null) {
+            // create session cookies
+            let sig = Math.floor((Math.random() * 10000000) + 10000000)
+            res.cookie('_passport_' + storeId + '_sig', sig, cookieOptions)
+
+            let lang = req.params.lang
+            let oauthPath = '/' + storeId + '/' + id + '/' + sig + '/oauth'
+            let baseUri = config.baseUri
+            // show or hide link to skip login
+            let enableSkip = Boolean(req.query.enable_skip)
+
+            let providers = Object.assign({}, config.strategies)
+            // ref.: https://ecomstore.docs.apiary.io/#reference/stores/store-object
+            let store = {
+              'id': storeId,
+              'name': body.name
+            }
+            if (typeof body.logo === 'object' && body.logo !== null) {
+              store.logo = body.logo.url
+            }
+            // check custom store strategies
+            let customProviders = body.oauth_providers
+            if (typeof customProviders === 'object' && customProviders !== null) {
+              for (let provider in customProviders) {
+                if (customProviders.hasOwnProperty(provider) && providers.hasOwnProperty(provider)) {
+                  // mark custom store oauth app
+                  providers[provider].customStrategy = true
+                }
+              }
+            }
+
+            // res.render('login', { lang, store, baseUri, enableSkip, oauthPath, providers })
+            res.send({
+              lang: lang,
+              store: store,
+              baseUri: baseUri,
+              enableSkip: enableSkip,
+              providers: providers,
+              oauthPath: oauthPath
+            })
+          } else {
+            res.status(404).send('Store not found')
+          }
+        }
+
+        // get store info
+        api.readStore(storeId, callback)
+      }
+    })
+
     let oauthStart = (req, res, next) => {
       res.setHeader('content-type', 'text/plain; charset=utf-8')
       // check store ID
