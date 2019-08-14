@@ -135,6 +135,21 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       res.status(400).send('Invalid request ID, must follow RegEx pattern ^[\\w.]{32}$')
     }
 
+    let getProviders = (body) => {
+      let providers = Object.assign({}, config.strategies)
+
+      // check custom store strategies
+      let customProviders = body.oauth_providers
+      if (typeof customProviders === 'object' && customProviders !== null) {
+        for (let provider in customProviders) {
+          if (customProviders.hasOwnProperty(provider) && providers.hasOwnProperty(provider)) {
+            // mark custom store oauth app
+            providers[provider].customStrategy = true
+          }
+        }
+      }
+    }
+
     app.get(config.baseUri + ':lang/:store/:id/login.html', (req, res) => {
       // check id
       let id = req.params.id
@@ -153,7 +168,6 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             // show or hide link to skip login
             let enableSkip = Boolean(req.query.enable_skip)
 
-            let providers = Object.assign({}, config.strategies)
             // ref.: https://ecomstore.docs.apiary.io/#reference/stores/store-object
             let store = {
               'id': storeId,
@@ -162,17 +176,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             if (typeof body.logo === 'object' && body.logo !== null) {
               store.logo = body.logo.url
             }
-            // check custom store strategies
-            let customProviders = body.oauth_providers
-            if (typeof customProviders === 'object' && customProviders !== null) {
-              for (let provider in customProviders) {
-                if (customProviders.hasOwnProperty(provider) && providers.hasOwnProperty(provider)) {
-                  // mark custom store oauth app
-                  providers[provider].customStrategy = true
-                }
-              }
-            }
-
+            let providers = getProviders(body)
             res.render('login', { lang, store, baseUri, enableSkip, oauthPath, providers })
           } else {
             res.status(404).send('Store not found')
@@ -184,7 +188,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       }
     })
 
-    app.get(config.baseUri + ':lang/:store/:id/rest', (req, res) => {
+    app.get(config.baseUri + ':lang/:store/:id/oauth-providers', (req, res) => {
       // check id
       let id = req.params.id
       if (idValidate(id, res) === true) {
@@ -196,36 +200,15 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             let sig = Math.floor((Math.random() * 10000000) + 10000000)
             res.cookie('_passport_' + storeId + '_sig', sig, cookieOptions)
 
-            let lang = req.params.lang
             let oauthPath = '/' + storeId + '/' + id + '/' + sig + '/oauth'
             let baseUri = config.baseUri
-            // show or hide link to skip login
-            let enableSkip = Boolean(req.query.enable_skip)
 
-            let providers = Object.assign({}, config.strategies)
-            // ref.: https://ecomstore.docs.apiary.io/#reference/stores/store-object
-            let store = {
-              'id': storeId,
-              'name': body.name
-            }
-            if (typeof body.logo === 'object' && body.logo !== null) {
-              store.logo = body.logo.url
-            }
-            // check custom store strategies
-            let customProviders = body.oauth_providers
-            if (typeof customProviders === 'object' && customProviders !== null) {
-              for (let provider in customProviders) {
-                if (customProviders.hasOwnProperty(provider) && providers.hasOwnProperty(provider)) {
-                  // mark custom store oauth app
-                  providers[provider].customStrategy = true
-                }
-              }
-            }
+            let providers = getProviders(body)
 
             res.send({
-              baseUri: baseUri,
-              providers: providers,
-              oauthPath: oauthPath
+              baseUri,
+              providers,
+              oauthPath
             })
           } else {
             res.status(404).send('Store not found')
