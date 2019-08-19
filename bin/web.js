@@ -564,7 +564,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     })
 
     // open REST API
-    require('./../routes/api.js')(app, config.baseUri)
+    require('./../routes/api.js')(app, config.baseUri, config.jwtSecret)
 
     // handle OAuth errors
     app.use(/.*\/(callback\.html|oauth)$/, (err, req, res, next) => {
@@ -576,7 +576,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     })
 
     // simple authentication
-    app.get(config.baseUri + ':lang/:store/:id/login', (req, res) => {
+    app.get(config.baseUri + ':lang/:store/:id/login.json', (req, res) => {
       // check id
       let id = req.params.id
       if (idValidate(id, res) === true) {
