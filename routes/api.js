@@ -7,6 +7,9 @@ const auth = require('./../lib/Auth.js')
 // methods to Store API
 const api = require('./../lib/Api.js')
 
+// authetication level
+let level
+
 const sendError = (res, status, code, msg) => {
   // error response
   res.status(status).json({
@@ -46,7 +49,65 @@ const Callback = (res) => {
   }
 }
 
-module.exports = (app, baseUri) => {
+const CallbackCustomers = (res) => {
+  // api requests callback
+  return (err, body, errMsg) => {
+    if (!err) {
+      switch (body) {
+        case true:
+          // resource modified
+          // response with no content
+          res.status(204).end()
+          break
+
+        case false:
+          // unauthorized
+          let errMsg = 'Prohibited endpoint or customer not related with respective object'
+          sendError(res, 401, 1100, errMsg)
+          break
+
+        default:
+          let respBody = {}
+          switch (level) {
+            case 0:
+              // unauthorized
+              let errMsg = 'Prohibited endpoint or customer not related with respective object'
+              sendError(res, 401, 1100, errMsg)
+              break
+            case 1:
+              respBody = {
+                _id: body._id,
+                main_email: body.main_email,
+                display_name: body.display_name
+              }
+              break
+            case 2:
+              respBody = {
+                _id: body._id,
+                main_email: body.main_email,
+                display_name: body.display_name,
+                orders: body.orders
+              }
+              break
+            case 3:
+              respBody = body
+              break
+            default:
+              break
+          }
+          // response with JSON object
+          res.json(respBody)
+      }
+    } else if (errMsg) {
+      // pass error exposed by Store API
+      sendError(res, 400, 1300, errMsg.en_us)
+    } else {
+      sendError(res, 500, 1200, 'Internal error, try again later')
+    }
+  }
+}
+
+module.exports = (app, baseUri, secret) => {
   // complete base URI
   baseUri = baseUri + ':store/api'
 
@@ -83,12 +144,42 @@ module.exports = (app, baseUri) => {
     }
   })
 
+  app.use(baseUri + '/*.json', (req, res, next) => {
+    const jwt = require('jwt-simple')
+    let decoded
+    let accessToken = req.get('X-Access-Token')
+    try {
+      decoded = jwt.decode(accessToken, secret)
+      level = decoded.level
+    } catch (e) {
+      let errMsg = 'Invalid token'
+      sendError(res, 401, 1100, errMsg)
+    }
+
+    if (req.method === 'PATCH' || req.method === 'POST' || req.method === 'PUT') {
+      switch (level) {
+        case 0:
+        case 1:
+          let errMsg = 'Unauthorized, need permission'
+          sendError(res, 401, null, errMsg)
+          break
+        case 2:
+        case 3:
+          next()
+          break
+        default: break
+      }
+    } else {
+      next()
+    }
+  })
+
   app.use(baseUri + '/me.json', (req, res) => {
     // customer resource
     switch (req.method) {
       case 'GET':
         // returns customer object
-        api.readCustomer(req.params.store, req.customer, Callback(res))
+        api.readCustomer(req.params.store, req.customer, CallbackCustomers(res))
         break
 
       case 'PATCH':
