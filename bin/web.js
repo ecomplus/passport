@@ -576,44 +576,36 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     })
 
     // simple authentication
-    app.get(config.baseUri + ':lang/:store/:id/login.json', (req, res) => {
-      // check id
-      let id = req.params.id
-      if (idValidate(id, res) === true) {
-        let storeId = parseInt(req.params.store, 10)
-
-        // get store infor
-        // get customer infor
-        let body = req.body
-        let email = body.email
-        let docNumber = body.doc_number || null
-        api.findCustomerByEmail(storeId, email, docNumber, (err, id, customer) => {
-          if (!err && typeof customer === 'object' && customer !== null) {
-            // create session cookies
-            let sig = Math.floor((Math.random() * 10000000) + 10000000)
-            res.cookie('_passport_' + storeId + '_sig', sig, cookieOptions)
-            let level = (email && docNumber) ? 2 : 1
-            let out = {
-              // returns only public info
-              'customer': {
-                'display_name': customer.display_name,
-                'gender': customer.gender
-              },
-              // generate jwt
-              'auth': {
-                'id': customer._id,
-                'token': auth.generateToken(storeId, customer._id, level)
-              }
+    app.get(config.baseUri + ':lang/:store/login.json', (req, res) => {
+      let storeId = parseInt(req.params.store, 10)
+      // get store infor
+      // get customer infor
+      let body = req.body
+      let email = body.email
+      let docNumber = body.doc_number || null
+      api.findCustomerByEmail(storeId, email, docNumber, (err, id, customer) => {
+        if (!err && typeof customer === 'object' && customer !== null) {
+          let level = (email && docNumber) ? 2 : 1
+          let out = {
+            // returns only public info
+            'customer': {
+              'display_name': customer.display_name,
+              'gender': customer.gender
+            },
+            // generate jwt
+            'auth': {
+              'id': customer._id,
+              'token': auth.generateToken(storeId, customer._id, level)
             }
-            res.json(out)
-          } else {
-            res.status(403).json({
-              'status': 403,
-              'error': 'Forbidden, no profile found with email provided'
-            })
           }
-        })
-      }
+          res.json(out)
+        } else {
+          res.status(403).json({
+            'status': 403,
+            'error': 'Forbidden, no profile found with email provided'
+          })
+        }
+      })
     })
     // production error handler
     // no stacktraces leaked to user
