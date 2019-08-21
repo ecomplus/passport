@@ -46,65 +46,6 @@ const Callback = (res) => {
   }
 }
 
-const CallbackCustomers = (res, req) => {
-  // api requests callback
-  return (err, body, errMsg) => {
-    if (!err) {
-      let resBody
-      switch (body) {
-        case true:
-          // resource modified
-          // response with no content
-          res.status(204).end()
-          break
-
-        case false:
-          // unauthorized
-          errMsg = 'Prohibited endpoint or customer not related with respective object'
-          sendError(res, 401, 1100, errMsg)
-          break
-
-        default:
-          resBody = {}
-          switch (req.authLevel) {
-            case 0:
-              // unauthorized
-              errMsg = 'Prohibited endpoint or customer not related with respective object'
-              sendError(res, 401, 1100, errMsg)
-              break
-            case 1:
-              resBody = {
-                _id: body._id,
-                main_email: body.main_email,
-                display_name: body.display_name
-              }
-              break
-            case 2:
-              resBody = {
-                _id: body._id,
-                main_email: body.main_email,
-                display_name: body.display_name,
-                orders: body.orders
-              }
-              break
-            case 3:
-              resBody = body
-              break
-            default:
-              break
-          }
-          // response with JSON object
-          res.json(resBody)
-      }
-    } else if (errMsg) {
-      // pass error exposed by Store API
-      sendError(res, 400, 1300, errMsg.en_us)
-    } else {
-      sendError(res, 500, 1200, 'Internal error, try again later')
-    }
-  }
-}
-
 module.exports = (app, baseUri) => {
   // complete base URI
   baseUri = baseUri + ':store/api'
@@ -130,11 +71,28 @@ module.exports = (app, baseUri) => {
       const authLevel = auth.validate(customerId, storeId, accessToken)
       if (typeof authLevel === 'number' && authLevel > 0) {
         // authenticated
-        req.customer = customerId
-        // save authentication level
-        req.authLevel = authLevel
-        // continue
-        next()
+        // check authorization level by request method
+        let authorized = false
+        switch (req.method.toLowerCase()) {
+          case 'get':
+          case 'post':
+            authorized = authLevel >= 2
+            break
+          case 'patch':
+          case 'put':
+            authorized = authLevel >= 3
+            break
+        }
+
+        if (authorized) {
+          // save authentication and continue
+          req.customer = customerId
+          req.authLevel = authLevel
+          next()
+        } else {
+          const errMsg = 'Unauthorized, no permission for this request'
+          sendError(res, 401, 1600, errMsg)
+        }
       } else {
         // unauthorized
         const { error, message } = authLevel
@@ -147,33 +105,18 @@ module.exports = (app, baseUri) => {
     }
   })
 
-  app.use(baseUri + '/*.json', (req, res, next) => {
-    if (req.method === 'PATCH' || req.method === 'POST' || req.method === 'PUT') {
-      if (req.authLevel >= 2) {
-        next()
-      } else {
-        const errMsg = 'Unauthorized, need permission'
-        sendError(res, 401, null, errMsg)
-      }
-    } else {
-      next()
-    }
-  })
-
   app.use(baseUri + '/me.json', (req, res) => {
     // customer resource
-    switch (req.method) {
-      case 'GET':
+    switch (req.method.toLowerCase()) {
+      case 'get':
         // returns customer object
-        api.readCustomer(req.params.store, req.customer, CallbackCustomers(res, req))
+        api.readCustomer(req.params.store, req.customer, Callback(res))
         break
-
-      case 'PATCH':
+      case 'patch':
         // modify customer
         // pass request body
         api.updateCustomer(req.params.store, req.customer, req.body, Callback(res))
         break
-
       default:
         sendError(res, 405, 1401, 'Method not allowed, you can only read (GET) and edit (PATCH)')
     }
