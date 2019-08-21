@@ -137,7 +137,6 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
 
     const getProviders = (body) => {
       const providers = Object.assign({}, config.strategies)
-
       // check custom store strategies
       const customProviders = body.oauth_providers
       if (typeof customProviders === 'object' && customProviders !== null) {
@@ -148,6 +147,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           }
         }
       }
+      return providers
     }
 
     const generateOauthPath = (id, storeId, res) => {
