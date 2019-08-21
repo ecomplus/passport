@@ -4,7 +4,7 @@
   "description": "E-Com Plus service for customer login and signup with Passportjs",
   "main": "main.js",
   "scripts": {
-    "test": "node ./main.js"
+    "release": "standard-version"
   },
   "author": "E-Com Club",
   "license": "GPL-3.0",
@@ -21,5 +21,17 @@
     "passport-google-oauth20": "1.x",
     "passport-windowslive": "1.x",
     "redis": "2.x"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^8.1.0",
+    "@commitlint/config-conventional": "^8.1.0",
+    "husky": "^3.0.4",
+    "standard": "^14.0.0",
+    "standard-version": "^7.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
   }
 }
