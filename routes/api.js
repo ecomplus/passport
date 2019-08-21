@@ -7,9 +7,6 @@ const auth = require('./../lib/Auth.js')
 // methods to Store API
 const api = require('./../lib/Api.js')
 
-// authetication level
-let level
-
 const sendError = (res, status, code, msg) => {
   // error response
   res.status(status).json({
@@ -49,7 +46,7 @@ const Callback = (res) => {
   }
 }
 
-const CallbackCustomers = (res) => {
+const CallbackCustomers = (res, req) => {
   // api requests callback
   return (err, body, errMsg) => {
     if (!err) {
@@ -68,7 +65,7 @@ const CallbackCustomers = (res) => {
 
         default:
           let respBody = {}
-          switch (level) {
+          switch (req.authLevel) {
             case 0:
               // unauthorized
               let errMsg = 'Prohibited endpoint or customer not related with respective object'
@@ -107,7 +104,7 @@ const CallbackCustomers = (res) => {
   }
 }
 
-module.exports = (app, baseUri, secret) => {
+module.exports = (app, baseUri) => {
   // complete base URI
   baseUri = baseUri + ':store/api'
 
@@ -128,9 +125,11 @@ module.exports = (app, baseUri, secret) => {
     if (accessToken && customerId) {
       // check token
       let Auth = auth.validate(customerId, storeId, accessToken)
-      if (Auth === true) {
+      if (!Auth.error) {
         // authenticated
         req.customer = customerId
+        // authentication level
+        req.authLevel = Auth.level
         // continue
         next()
       } else {
@@ -145,19 +144,8 @@ module.exports = (app, baseUri, secret) => {
   })
 
   app.use(baseUri + '/*.json', (req, res, next) => {
-    const jwt = require('jwt-simple')
-    let decoded
-    let accessToken = req.get('X-Access-Token')
-    try {
-      decoded = jwt.decode(accessToken, secret)
-      level = decoded.level
-    } catch (e) {
-      let errMsg = 'Invalid token'
-      sendError(res, 401, 1100, errMsg)
-    }
-
     if (req.method === 'PATCH' || req.method === 'POST' || req.method === 'PUT') {
-      switch (level) {
+      switch (req.authLevel) {
         case 0:
         case 1:
           let errMsg = 'Unauthorized, need permission'
@@ -179,7 +167,7 @@ module.exports = (app, baseUri, secret) => {
     switch (req.method) {
       case 'GET':
         // returns customer object
-        api.readCustomer(req.params.store, req.customer, CallbackCustomers(res))
+        api.readCustomer(req.params.store, req.customer, CallbackCustomers(res, req))
         break
 
       case 'PATCH':
