@@ -203,7 +203,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             const baseUri = config.baseUri
             const providers = getProviders(body)
 
-            res.send({
+            res.json({
               baseUri,
               providers,
               oauthPath
