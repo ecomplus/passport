@@ -564,7 +564,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     })
 
     // open REST API
-    require('./../routes/api.js')(app, config.baseUri, config.jwtSecret)
+    require('./../routes/api.js')(app, config.baseUri)
 
     // handle OAuth errors
     app.use(/.*\/(callback\.html|oauth)$/, (err, req, res, next) => {
@@ -576,7 +576,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     })
 
     // simple authentication
-    app.get(config.baseUri + ':lang/:store/login.json', (req, res) => {
+    app.post(config.baseUri + ':lang/:store/login.json', (req, res) => {
       let storeId = parseInt(req.params.store, 10)
       // get store infor
       // get customer infor
