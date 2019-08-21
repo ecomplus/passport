@@ -135,14 +135,14 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       res.status(400).send('Invalid request ID, must follow RegEx pattern ^[\\w.]{32}$')
     }
 
-    let getProviders = (body) => {
-      let providers = Object.assign({}, config.strategies)
+    const getProviders = (body) => {
+      const providers = Object.assign({}, config.strategies)
 
       // check custom store strategies
-      let customProviders = body.oauth_providers
+      const customProviders = body.oauth_providers
       if (typeof customProviders === 'object' && customProviders !== null) {
-        for (let provider in customProviders) {
-          if (customProviders.hasOwnProperty(provider) && providers.hasOwnProperty(provider)) {
+        for (const provider in customProviders) {
+          if (customProviders[provider] !== undefined && providers[provider] !== undefined) {
             // mark custom store oauth app
             providers[provider].customStrategy = true
           }
@@ -150,33 +150,36 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       }
     }
 
+    const generateOauthPath = (id, storeId, res) => {
+      // create session cookies
+      const sig = Math.floor((Math.random() * 10000000) + 10000000)
+      res.cookie('_passport_' + storeId + '_sig', sig, cookieOptions)
+      return '/' + storeId + '/' + id + '/' + sig + '/oauth'
+    }
+
     app.get(config.baseUri + ':lang/:store/:id/login.html', (req, res) => {
       // check id
-      let id = req.params.id
+      const id = req.params.id
       if (idValidate(id, res) === true) {
         // start login flow
-        let storeId = parseInt(req.params.store, 10)
-        let callback = (err, body) => {
+        const storeId = parseInt(req.params.store, 10)
+        const callback = (err, body) => {
           if (!err && typeof body === 'object' && body !== null) {
-            // create session cookies
-            let sig = Math.floor((Math.random() * 10000000) + 10000000)
-            res.cookie('_passport_' + storeId + '_sig', sig, cookieOptions)
-
-            let lang = req.params.lang
-            let oauthPath = '/' + storeId + '/' + id + '/' + sig + '/oauth'
-            let baseUri = config.baseUri
+            const oauthPath = generateOauthPath(id, storeId, res)
+            const lang = req.params.lang
+            const baseUri = config.baseUri
             // show or hide link to skip login
-            let enableSkip = Boolean(req.query.enable_skip)
+            const enableSkip = Boolean(req.query.enable_skip)
 
             // ref.: https://ecomstore.docs.apiary.io/#reference/stores/store-object
-            let store = {
-              'id': storeId,
-              'name': body.name
+            const store = {
+              id: storeId,
+              name: body.name
             }
             if (typeof body.logo === 'object' && body.logo !== null) {
               store.logo = body.logo.url
             }
-            let providers = getProviders(body)
+            const providers = getProviders(body)
             res.render('login', { lang, store, baseUri, enableSkip, oauthPath, providers })
           } else {
             res.status(404).send('Store not found')
@@ -188,22 +191,17 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       }
     })
 
-    app.get(config.baseUri + ':lang/:store/:id/oauth-providers', (req, res) => {
+    app.get(config.baseUri + ':store/:id/oauth-providers.json', (req, res) => {
       // check id
-      let id = req.params.id
+      const id = req.params.id
       if (idValidate(id, res) === true) {
         // start login flow
-        let storeId = parseInt(req.params.store, 10)
-        let callback = (err, body) => {
+        const storeId = parseInt(req.params.store, 10)
+        const callback = (err, body) => {
           if (!err && typeof body === 'object' && body !== null) {
-            // create session cookies
-            let sig = Math.floor((Math.random() * 10000000) + 10000000)
-            res.cookie('_passport_' + storeId + '_sig', sig, cookieOptions)
-
-            let oauthPath = '/' + storeId + '/' + id + '/' + sig + '/oauth'
-            let baseUri = config.baseUri
-
-            let providers = getProviders(body)
+            const oauthPath = generateOauthPath(id, storeId, res)
+            const baseUri = config.baseUri
+            const providers = getProviders(body)
 
             res.send({
               baseUri,
