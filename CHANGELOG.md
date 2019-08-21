@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.4](https://github.com/ecomclub/ecomplus-passport/compare/v0.1.3...v0.1.4) (2019-08-21)
+
+
+### Bug Fixes
+
+* **auth:** check for level property on decoded token object ([cd2e7bf](https://github.com/ecomclub/ecomplus-passport/commit/cd2e7bf))
+
 ### [0.1.3](https://github.com/ecomclub/ecomplus-passport/compare/v0.1.2...v0.1.3) (2019-08-21)
 
 
