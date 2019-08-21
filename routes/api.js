@@ -7,12 +7,12 @@ const auth = require('./../lib/Auth.js')
 // methods to Store API
 const api = require('./../lib/Api.js')
 
-const sendError = (res, status, code, msg) => {
+const sendError = (res, status, code, message) => {
   // error response
   res.status(status).json({
-    'status': status,
-    'error_code': code,
-    'message': msg
+    status,
+    error_code: code,
+    message
   })
 }
 
@@ -29,7 +29,7 @@ const Callback = (res) => {
 
         case false:
           // unauthorized
-          let errMsg = 'Prohibited endpoint or customer not related with respective object'
+          errMsg = 'Prohibited endpoint or customer not related with respective object'
           sendError(res, 401, 1100, errMsg)
           break
 
@@ -50,6 +50,7 @@ const CallbackCustomers = (res, req) => {
   // api requests callback
   return (err, body, errMsg) => {
     if (!err) {
+      let resBody
       switch (body) {
         case true:
           // resource modified
@@ -59,27 +60,27 @@ const CallbackCustomers = (res, req) => {
 
         case false:
           // unauthorized
-          let errMsg = 'Prohibited endpoint or customer not related with respective object'
+          errMsg = 'Prohibited endpoint or customer not related with respective object'
           sendError(res, 401, 1100, errMsg)
           break
 
         default:
-          let respBody = {}
+          resBody = {}
           switch (req.authLevel) {
             case 0:
               // unauthorized
-              let errMsg = 'Prohibited endpoint or customer not related with respective object'
+              errMsg = 'Prohibited endpoint or customer not related with respective object'
               sendError(res, 401, 1100, errMsg)
               break
             case 1:
-              respBody = {
+              resBody = {
                 _id: body._id,
                 main_email: body.main_email,
                 display_name: body.display_name
               }
               break
             case 2:
-              respBody = {
+              resBody = {
                 _id: body._id,
                 main_email: body.main_email,
                 display_name: body.display_name,
@@ -87,13 +88,13 @@ const CallbackCustomers = (res, req) => {
               }
               break
             case 3:
-              respBody = body
+              resBody = body
               break
             default:
               break
           }
           // response with JSON object
-          res.json(respBody)
+          res.json(resBody)
       }
     } else if (errMsg) {
       // pass error exposed by Store API
@@ -112,15 +113,17 @@ module.exports = (app, baseUri) => {
     // check request body
     if (req.body && (typeof req.body !== 'object' || Array.isArray(req.body))) {
       // invalid body
-      let errMsg = 'Not acceptable, body content must be a valid JSON object'
+      const errMsg = 'Not acceptable, body content must be a valid JSON object'
       sendError(res, 406, 799, errMsg)
       return
     }
 
     // authenticate
-    let accessToken = req.get('X-Access-Token')
-    let customerId = req.get('X-My-ID')
-    let storeId = parseInt(req.params.store, 10)
+    const accessToken = req.get('X-Access-Token')
+    const customerId = req.get('X-My-ID')
+    const storeId = parseInt(req.params.store, 10)
+    // preset auth level 0
+    req.authLevel = 0
 
     if (accessToken && customerId) {
       // check token
@@ -139,24 +142,18 @@ module.exports = (app, baseUri) => {
       }
     } else {
       // forbidden
-      let errMsg = 'It is necessary to provide valid customer ID (X-My-ID) and token (X-Access-Token)'
+      const errMsg = 'It is necessary to provide valid customer ID (X-My-ID) and token (X-Access-Token)'
       sendError(res, 403, 800, errMsg)
     }
   })
 
   app.use(baseUri + '/*.json', (req, res, next) => {
     if (req.method === 'PATCH' || req.method === 'POST' || req.method === 'PUT') {
-      switch (req.authLevel) {
-        case 0:
-        case 1:
-          let errMsg = 'Unauthorized, need permission'
-          sendError(res, 401, null, errMsg)
-          break
-        case 2:
-        case 3:
-          next()
-          break
-        default: break
+      if (req.authLevel >= 2) {
+        next()
+      } else {
+        const errMsg = 'Unauthorized, need permission'
+        sendError(res, 401, null, errMsg)
       }
     } else {
       next()
@@ -184,10 +181,10 @@ module.exports = (app, baseUri) => {
 
   app.use(baseUri + '/:resource([^/]+)(/:id)?(/:path)?.json', (req, res) => {
     // treat API endpoints
+    let endpoint
     switch (req.params.resource) {
       case 'carts':
       case 'orders':
-        let endpoint
         if (!req.params.path) {
           if (req.method !== 'DELETE') {
             endpoint = null
