@@ -124,17 +124,18 @@ module.exports = (app, baseUri) => {
 
     if (accessToken && customerId) {
       // check token
-      let Auth = auth.validate(customerId, storeId, accessToken)
-      if (!Auth.error) {
+      const authLevel = auth.validate(customerId, storeId, accessToken)
+      if (typeof authLevel === 'number' && authLevel > 0) {
         // authenticated
         req.customer = customerId
-        // authentication level
-        req.authLevel = Auth.level
+        // save authentication level
+        req.authLevel = authLevel
         // continue
         next()
       } else {
         // unauthorized
-        sendError(res, 401, 800 + Auth.error, Auth.message)
+        const { error, message } = authLevel
+        sendError(res, 401, 800 + error, message)
       }
     } else {
       // forbidden
