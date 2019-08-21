@@ -576,37 +576,40 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     })
 
     // simple authentication
-    app.post(config.baseUri + ':lang/:store/login.json', (req, res) => {
-      let storeId = parseInt(req.params.store, 10)
+    app.post(config.baseUri + ':store/identify.json', (req, res) => {
+      const storeId = parseInt(req.params.store, 10)
       // get store infor
       // get customer infor
-      let body = req.body
-      let email = body.email
-      let docNumber = body.doc_number || null
+      const body = req.body
+      const email = body.email
+      const docNumber = body.doc_number || null
+
       api.findCustomerByEmail(storeId, email, docNumber, (err, id, customer) => {
         if (!err && typeof customer === 'object' && customer !== null) {
-          let level = (email && docNumber) ? 2 : 1
-          let out = {
-            // returns only public info
-            'customer': {
-              'display_name': customer.display_name,
-              'gender': customer.gender
-            },
-            // generate jwt
-            'auth': {
-              'id': customer._id,
-              'token': auth.generateToken(storeId, customer._id, level)
-            }
+          let token
+          if (docNumber) {
+            // generate jwt with auth level 2
+            token = auth.generateToken(storeId, customer._id, 2)
+          } else {
+            // no token for email only authentication
+            token = null
           }
-          res.json(out)
+          res.json({
+            customer,
+            auth: {
+              id,
+              token
+            }
+          })
         } else {
           res.status(403).json({
-            'status': 403,
-            'error': 'Forbidden, no profile found with email provided'
+            status: 403,
+            error: 'Forbidden, no profile found with email provided'
           })
         }
       })
     })
+
     // production error handler
     // no stacktraces leaked to user
     app.use((err, req, res, next) => {
@@ -620,9 +623,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
         status = 500
       }
       res.status(status)
-      res.json({
-        'status': status
-      })
+      res.json({ status })
     })
 
     app.listen(config.proxyPort, () => {
