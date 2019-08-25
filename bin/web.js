@@ -135,16 +135,25 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       res.status(400).send('Invalid request ID, must follow RegEx pattern ^[\\w.]{32}$')
     }
 
-    const getProviders = (body) => {
-      const providers = Object.assign({}, config.strategies)
+    const listProviders = body => {
+      const strategies = Object.assign({}, config.strategies)
       // check custom store strategies
-      const customProviders = body.oauth_providers
-      if (typeof customProviders === 'object' && customProviders !== null) {
-        for (const provider in customProviders) {
-          if (customProviders[provider] !== undefined && providers[provider] !== undefined) {
+      const customStrategies = body.oauth_providers
+      if (typeof customStrategies === 'object' && customStrategies !== null) {
+        for (const provider in customStrategies) {
+          if (customStrategies[provider] !== undefined && strategies[provider] !== undefined) {
             // mark custom store oauth app
-            providers[provider].customStrategy = true
+            strategies[provider].customStrategy = true
           }
+        }
+      }
+
+      // returns only providers public info
+      const providers = {}
+      for (const provider in strategies) {
+        if (strategies[provider]) {
+          const { providerName, htmlClass, faIcon } = strategies[provider]
+          providers[provider] = { providerName, htmlClass, faIcon }
         }
       }
       return providers
@@ -179,7 +188,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             if (typeof body.logo === 'object' && body.logo !== null) {
               store.logo = body.logo.url
             }
-            const providers = getProviders(body)
+            const providers = listProviders(body)
             res.render('login', { lang, store, baseUri, enableSkip, oauthPath, providers })
           } else {
             res.status(404).send('Store not found')
@@ -201,7 +210,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           if (!err && typeof body === 'object' && body !== null) {
             const oauthPath = generateOauthPath(id, storeId, res)
             const baseUri = config.baseUri
-            const providers = getProviders(body)
+            const providers = listProviders(body)
 
             res.json({
               baseUri,
