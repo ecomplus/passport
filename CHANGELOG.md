@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.5](https://github.com/ecomclub/ecomplus-passport/compare/v0.1.4...v0.1.5) (2019-08-25)
+
+
+### Bug Fixes
+
+* **list-providers:** returns only providers public info ([680bb78](https://github.com/ecomclub/ecomplus-passport/commit/680bb78))
+
 ### [0.1.4](https://github.com/ecomclub/ecomplus-passport/compare/v0.1.3...v0.1.4) (2019-08-21)
 
 
