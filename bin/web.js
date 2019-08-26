@@ -162,8 +162,14 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     const generateOauthPath = (id, storeId, res) => {
       // create session cookies
       const sig = Math.floor((Math.random() * 10000000) + 10000000)
+      return {
+        sig,
+        oauthPath: '/' + storeId + '/' + id + '/' + sig + '/oauth'
+      }
+    }
+
+    const saveSigCookie = (storeId, sig, res) => {
       res.cookie('_passport_' + storeId + '_sig', sig, cookieOptions)
-      return '/' + storeId + '/' + id + '/' + sig + '/oauth'
     }
 
     app.get(config.baseUri + ':lang/:store/:id/login.html', (req, res) => {
@@ -174,7 +180,8 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
         const storeId = parseInt(req.params.store, 10)
         const callback = (err, body) => {
           if (!err && typeof body === 'object' && body !== null) {
-            const oauthPath = generateOauthPath(id, storeId, res)
+            const { sig, oauthPath } = generateOauthPath(id, storeId, res)
+            saveSigCookie(storeId, sig, res)
             const lang = req.params.lang
             const baseUri = config.baseUri
             // show or hide link to skip login
@@ -208,14 +215,16 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
         const storeId = parseInt(req.params.store, 10)
         const callback = (err, body) => {
           if (!err && typeof body === 'object' && body !== null) {
-            const oauthPath = generateOauthPath(id, storeId, res)
-            const baseUri = config.baseUri
+            const { sig, oauthPath } = generateOauthPath(id, storeId, res)
+            const { host, baseUri } = config
             const providers = listProviders(body)
 
             res.json({
+              host,
               baseUri,
+              oauthPath,
               providers,
-              oauthPath
+              iframeUri: `${host}${baseUri}${storeId}/${id}/${sig}/oauth-session`
             })
           } else {
             res.status(404).send('Store not found')
@@ -225,6 +234,11 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
         // get store info
         api.readStore(storeId, callback)
       }
+    })
+
+    app.get(config.baseUri + ':store/:id/:sig/oauth-session', (req, res) => {
+      saveSigCookie(req.params.store, req.params.sig, res)
+      res.end()
     })
 
     let oauthStart = (req, res, next) => {
