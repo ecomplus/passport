@@ -238,6 +238,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
 
     app.get(config.baseUri + ':store/:id/:sig/oauth-session', (req, res) => {
       saveSigCookie(req.params.store, req.params.sig, res)
+      res.setHeader('content-type', 'text/plain; charset=utf-8')
       res.end()
     })
 
