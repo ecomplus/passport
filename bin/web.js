@@ -336,14 +336,17 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                   return
                 }
 
-                let returnToken = (customer) => {
-                  let out = {
+                const returnToken = (customer) => {
+                  // maximum auth level
+                  const level = 3
+                  const out = {
                     // returns only public info
-                    'customer': customer,
+                    customer,
                     // generate jwt
-                    'auth': {
-                      'id': customer._id,
-                      'token': auth.generateToken(store, customer._id, 3)
+                    auth: {
+                      id: customer._id,
+                      token: auth.generateToken(store, customer._id, level),
+                      level
                     }
                   }
                   res.json(out)
@@ -609,9 +612,11 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       api.findCustomerByEmail(storeId, email, docNumber, (err, id, customer) => {
         if (!err && typeof customer === 'object' && customer !== null) {
           let token
+          let level = 0
           if (docNumber) {
             // generate jwt with auth level 2
-            token = auth.generateToken(storeId, customer._id, 2)
+            level = 2
+            token = auth.generateToken(storeId, customer._id, level)
           } else {
             // no token for email only authentication
             token = null
@@ -620,7 +625,8 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             customer,
             auth: {
               id,
-              token
+              token,
+              level
             }
           })
         } else {
