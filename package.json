@@ -1,6 +1,6 @@
 {
   "name": "ecomplus-passport",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "E-Com Plus service for customer login and signup with Passportjs",
   "main": "main.js",
   "scripts": {

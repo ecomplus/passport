@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.8](https://github.com/ecomclub/ecomplus-passport/compare/v0.1.7...v0.1.8) (2019-09-25)
+
+
+### Features
+
+* **auth-level:** returning level number on auth object ([567929a](https://github.com/ecomclub/ecomplus-passport/commit/567929a))
+
 ### [0.1.7](https://github.com/ecomclub/ecomplus-passport/compare/v0.1.6...v0.1.7) (2019-08-26)
 
 
