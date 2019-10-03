@@ -73,15 +73,19 @@ module.exports = (app, baseUri) => {
         // authenticated
         // check authorization level by request method
         let authorized = false
-        switch (req.method.toLowerCase()) {
-          case 'get':
-          case 'post':
-            authorized = authLevel >= 2
-            break
-          case 'patch':
-          case 'put':
-            authorized = authLevel >= 3
-            break
+        if (req.path.endsWith('/me.json')) {
+          authorized = authLevel >= 2
+        } else {
+          switch (req.method.toLowerCase()) {
+            case 'get':
+            case 'post':
+              authorized = authLevel >= 2
+              break
+            case 'patch':
+            case 'put':
+              authorized = authLevel >= 3
+              break
+          }
         }
 
         if (authorized) {
