@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.11](https://github.com/ecomclub/ecomplus-passport/compare/v0.1.10...v0.1.11) (2019-10-03)
+
+
+### Bug Fixes
+
+* **api-auth:** check req.req.originalUrl instead of req.path ([474bbf4](https://github.com/ecomclub/ecomplus-passport/commit/474bbf4))
+
 ### [0.1.10](https://github.com/ecomclub/ecomplus-passport/compare/v0.1.9...v0.1.10) (2019-10-03)
 
 
