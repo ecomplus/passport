@@ -39,7 +39,7 @@ const Callback = (res) => {
       }
     } else if (errMsg) {
       // pass error exposed by Store API
-      sendError(res, 400, 1300, errMsg.en_us)
+      sendError(res, err.statusCode || 400, 1300, errMsg.en_us)
     } else {
       sendError(res, 500, 1200, 'Internal error, try again later')
     }
@@ -141,7 +141,13 @@ module.exports = (app, baseUri) => {
           }
         } else {
           // mount endpoint parts
-          endpoint = req.params.resource + '/' + req.params.id + '/' + req.params.path + '.json'
+          endpoint = req.params.resource
+          ;['id', 'path'].forEach(param => {
+            if (req.params[param]) {
+              endpoint += '/' + req.params[param]
+            }
+          })
+          endpoint += '.json'
         }
 
         // pass request to Store API
