@@ -53,9 +53,8 @@ const Strategies = {
   'google': {
     'Init': require('passport-google-oauth20').Strategy,
     'scope': [
-      'https://www.googleapis.com/auth/plus.login',
-      'https://www.googleapis.com/auth/userinfo.profile',
-      'https://www.googleapis.com/auth/userinfo.email'
+      'profile',
+      'email'
     ]
   },
   'windowslive': {
