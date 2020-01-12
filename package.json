@@ -18,7 +18,7 @@
     "moment": "2.x",
     "passport": "0.4.x",
     "passport-facebook": "2.x",
-    "passport-google-oauth20": "1.x",
+    "passport-google-oauth20": "2.x",
     "passport-windowslive": "1.x",
     "redis": "2.x"
   },
