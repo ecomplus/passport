@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.13](https://github.com/ecomclub/ecomplus-passport/compare/v0.1.12...v0.1.13) (2020-01-12)
+
+
+### Bug Fixes
+
+* **api-route:** fix mounting store api endpoint ([354ef0d](https://github.com/ecomclub/ecomplus-passport/commit/354ef0d))
+* **google-strategy:** migrate to google sign in (update scope) ([#1](https://github.com/ecomclub/ecomplus-passport/issues/1)) ([2381909](https://github.com/ecomclub/ecomplus-passport/commit/2381909))
+
 ### [0.1.12](https://github.com/ecomclub/ecomplus-passport/compare/v0.1.11...v0.1.12) (2019-12-26)
 
 
