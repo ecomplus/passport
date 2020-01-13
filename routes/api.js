@@ -132,23 +132,19 @@ module.exports = (app, baseUri) => {
     switch (req.params.resource) {
       case 'carts':
       case 'orders':
-        if (!req.params.path) {
-          if (req.method !== 'DELETE') {
-            endpoint = null
-          } else {
-            sendError(res, 405, 1505, 'Method not allowed, you cannot delete resources here')
-            return
-          }
-        } else {
-          // mount endpoint parts
-          endpoint = req.params.resource
-          ;['id', 'path'].forEach(param => {
-            if (req.params[param]) {
-              endpoint += '/' + req.params[param]
-            }
-          })
-          endpoint += '.json'
+        if (req.method.toLowerCase() === 'delete') {
+          sendError(res, 405, 1505, 'Method not allowed, you cannot delete resources here')
+          return
         }
+
+        // mount endpoint parts
+        endpoint = req.params.resource
+        ;['id', 'path'].forEach(param => {
+          if (req.params[param]) {
+            endpoint += '/' + req.params[param]
+          }
+        })
+        endpoint += '.json'
 
         // pass request to Store API
         api.crud(
