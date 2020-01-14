@@ -150,7 +150,7 @@ module.exports = (app, baseUri) => {
         api.crud(
           req.params.store,
           req.customer,
-          req.method,
+          req.method.toUpperCase(),
           req.params.resource,
           req.params.id,
           endpoint,
