@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.16](https://github.com/ecomclub/ecomplus-passport/compare/v0.1.15...v0.1.16) (2020-01-19)
+
+
+### Bug Fixes
+
+* **api:** always pass auth level >= 2 ([00022d5](https://github.com/ecomclub/ecomplus-passport/commit/00022d5))
+
 ### [0.1.15](https://github.com/ecomclub/ecomplus-passport/compare/v0.1.14...v0.1.15) (2020-01-14)
 
 
