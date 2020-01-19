@@ -71,22 +71,8 @@ module.exports = (app, baseUri) => {
       const authLevel = auth.validate(customerId, storeId, accessToken)
       if (typeof authLevel === 'number' && authLevel > 0) {
         // authenticated
-        // check authorization level by request method
-        let authorized = false
-        if (req.originalUrl.endsWith('/me.json')) {
-          authorized = authLevel >= 2
-        } else {
-          switch (req.method.toLowerCase()) {
-            case 'get':
-            case 'post':
-              authorized = authLevel >= 2
-              break
-            case 'patch':
-            case 'put':
-              authorized = authLevel >= 3
-              break
-          }
-        }
+        // check authorization level
+        const authorized = authLevel >= 2
 
         if (authorized) {
           // save authentication and continue
