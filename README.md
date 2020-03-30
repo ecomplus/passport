@@ -10,7 +10,7 @@ E-Com Plus service for customer login and signup with Passportjs
 
 # Setting up
 ```bash
-git clone https://github.com/ecomclub/ecomplus-passport
+git clone https://github.com/ecomplus/passport
 cd ecomplus-passport
 cp config/config-sample.json config/config.json
 nano config/config.json
