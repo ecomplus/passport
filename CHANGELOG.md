@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.17](https://github.com/ecomplus/passport/compare/v0.1.16...v0.1.17) (2020-03-30)
+
+
+### Bug Fixes
+
+* **oauth:** iframe may not work on safari, fallback with redirects ([5fd529e](https://github.com/ecomplus/passport/commit/5fd529e894b09297dea54bb7c6146a5f348db3a2))
+
 ### [0.1.16](https://github.com/ecomclub/ecomplus-passport/compare/v0.1.15...v0.1.16) (2020-01-19)
 
 
