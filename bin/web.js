@@ -238,7 +238,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     app.get(config.baseUri + ':store/:id/:sig/oauth-session', (req, res) => {
       saveSigCookie(req.params.store, req.params.sig, res)
       if (req.query.redirect) {
-        res.redirect(req.query.redirect)
+        res.redirect(`${req.query.redirect}?is_redirect=true`)
       } else {
         res.setHeader('content-type', 'text/plain; charset=utf-8')
         res.end()
@@ -248,22 +248,28 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     const oauthStart = (req, res, next) => {
       res.setHeader('content-type', 'text/plain; charset=utf-8')
       // check store ID
-      const store = parseInt(req.params.store, 10)
-      if (store > 100) {
+      const storeId = parseInt(req.params.store, 10)
+      if (storeId > 100) {
         // check id
         if (idValidate(req.params.id, res) === true) {
           // check session
-          if (req.cookies['_passport_' + store + '_sig'] === req.params.sig) {
-            // create id and store cookies
-            res.cookie('_passport_' + store + '_id', req.params.id, cookieOptions)
-            res.cookie('_passport_store', store, cookieOptions)
-            // pass next middleware
-            // run passport
-            next()
-          } else if (req.query.session_uri && !req.query.is_redirect) {
-            res.redirect(`${req.query.session_uri}?redirect=${config.host}${req.originalUrl}&is_redirect=true`)
+          const sessionCookie = req.cookies['_passport_' + storeId + '_sig']
+          if (sessionCookie) {
+            if (sessionCookie === req.params.sig) {
+              // create id and store cookies
+              res.cookie('_passport_' + storeId + '_id', req.params.id, cookieOptions)
+              res.cookie('_passport_store', storeId, cookieOptions)
+              // run passport
+              next()
+            } else {
+              res.status(400).send('Invalid session, restart flow at login.html')
+            }
+          } else if (!req.query.is_redirect) {
+            const { id, sig } = req.params
+            const sessionUrl = `${config.baseUri}${storeId}/${id}/${sig}/oauth-session`
+            res.redirect(`${sessionUrl}?redirect=${req.originalUrl}`)
           } else {
-            res.status(400).send('Invalid session, restart flow at login.html')
+            res.status(409).send('Nothing to do with no session cookie and no redirect URI')
           }
         }
       } else {
