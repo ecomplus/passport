@@ -253,23 +253,17 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
         // check id
         if (idValidate(req.params.id, res) === true) {
           // check session
-          const sessionCookie = req.cookies['_passport_' + store + '_sig']
-          if (sessionCookie) {
-            if (sessionCookie === req.params.sig) {
-              // create id and store cookies
-              res.cookie('_passport_' + store + '_id', req.params.id, cookieOptions)
-              res.cookie('_passport_store', store, cookieOptions)
-
-              // pass next middleware
-              // run passport
-              next()
-            } else {
-              res.status(400).send('Invalid session, restart flow at login.html')
-            }
-          } else if (req.query.session_uri) {
-            res.redirect(`${req.query.session_uri}?redirect=${config.host}${req.originalUrl}`)
+          if (req.cookies['_passport_' + store + '_sig'] === req.params.sig) {
+            // create id and store cookies
+            res.cookie('_passport_' + store + '_id', req.params.id, cookieOptions)
+            res.cookie('_passport_store', store, cookieOptions)
+            // pass next middleware
+            // run passport
+            next()
+          } else if (req.query.session_uri && !req.query.is_redirect) {
+            res.redirect(`${req.query.session_uri}?redirect=${config.host}${req.originalUrl}&is_redirect=true`)
           } else {
-            res.status(409).send('Nothing to do with no session cookie and no redirect URI')
+            res.status(400).send('Invalid session, restart flow at login.html')
           }
         }
       } else {
