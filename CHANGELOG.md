@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.18](https://github.com/ecomplus/passport/compare/v0.1.17...v0.1.18) (2020-04-03)
+
+
+### Bug Fixes
+
+* **auth-flow:** fix checking session and prevent infinite redirect ([595243c](https://github.com/ecomplus/passport/commit/595243cb2e456fed79254286ac1d75cc0558a5c0))
+
 ### [0.1.17](https://github.com/ecomplus/passport/compare/v0.1.16...v0.1.17) (2020-03-30)
 
 
