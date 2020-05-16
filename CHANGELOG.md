@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.20](https://github.com/ecomplus/passport/compare/v0.1.19...v0.1.20) (2020-05-16)
+
+
+### Bug Fixes
+
+* **web:** fix cookie options (secure) ([265b71d](https://github.com/ecomplus/passport/commit/265b71d1a8b6ec7393b80c54fbbb2b4d9d99a665))
+
 ### [0.1.19](https://github.com/ecomplus/passport/compare/v0.1.18...v0.1.19) (2020-04-03)
 
 
