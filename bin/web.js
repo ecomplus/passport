@@ -111,11 +111,14 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     })
 
     // keep id and token on cookies
-    let cookieOptions = {
+    const cookieOptions = {
       // browser session only
-      'expires': 0,
+      expires: 0,
+      // SameSite=None requires Secure
+      // only sent to the server over the HTTPS protocol
+      secure: true,
       // cookie only accessible by the web server
-      'httpOnly': true
+      httpOnly: true
     }
 
     // initialize OAuth strategies
