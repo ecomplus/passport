@@ -1,5 +1,7 @@
 'use strict'
 
+/* eslint-disable quote-props, comma-dangle */
+
 // log on files
 const logger = require('./../lib/Logger.js')
 // authentication with jwt
@@ -32,7 +34,7 @@ const Strategies = {
     'scope': [
       'email',
       'public_profile',
-      'user_birthday'
+      // 'user_birthday',
       // 'user_location'
     ],
     'profileFields': [
@@ -46,7 +48,7 @@ const Strategies = {
       'verified',
       'picture',
       'email',
-      'birthday'
+      // 'birthday',
       // 'location'
     ]
   },
@@ -63,7 +65,7 @@ const Strategies = {
       'wl.signin',
       'wl.basic',
       'wl.emails',
-      'wl.birthday'
+      'wl.birthday',
       // 'wl.phone_numbers',
       // 'wl.postal_addresses'
     ]
@@ -72,14 +74,14 @@ const Strategies = {
 
 // process.cwd() can change
 // keep initial absolute path
-let root = process.cwd()
+const root = process.cwd()
 // read config file
 fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
   if (err) {
     // can't read config file
     throw err
   } else {
-    let config = JSON.parse(data)
+    const config = JSON.parse(data)
 
     // setting up the app
     // set jwt salt
@@ -89,7 +91,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     // E-Com Plus Main API definitions
     stores.setApi(config.mainApiHost, config.mainApiBaseUri, config.mainApiPort)
     // new Express application
-    let app = Express()
+    const app = Express()
 
     app.use(bodyParser.json())
     app.use(cookieParser())
@@ -122,14 +124,14 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     }
 
     // initialize OAuth strategies
-    let strategies = config.strategies
-    let availableStrategies = []
+    const strategies = config.strategies
+    const availableStrategies = []
 
     app.get(config.baseUri, (req, res) => {
       res.json(availableStrategies)
     })
 
-    let idValidate = (id, res) => {
+    const idValidate = (id, res) => {
       if (/^[\w.]{32}$/.test(id)) {
         return true
       }
@@ -280,8 +282,8 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       }
     }
 
-    let oauthCallback = (req, res) => {
-      let user = req.user
+    const oauthCallback = (req, res) => {
+      const user = req.user
       if (typeof user === 'object' && user !== null && user.profile) {
         // successful authentication
         let store
@@ -292,7 +294,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
         }
         if (store) {
           // logger.log(user.profile)
-          if (user.profile.hasOwnProperty('_raw')) {
+          if (user.profile._raw) {
             delete user.profile._raw
           }
           let profile
@@ -303,7 +305,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           }
 
           if (profile) {
-            let id = req.cookies['_passport_' + store + '_id']
+            const id = req.cookies['_passport_' + store + '_id']
             if (idValidate(id, res) === true) {
               // save profile on redis
               // key will expire after 2 minutes
@@ -317,10 +319,10 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       res.sendFile(root + '/assets/app/callback.html')
     }
 
-    let oauthProfile = (req, res, next) => {
+    const oauthProfile = (req, res, next) => {
       // check if id is the same of stored
-      let store = parseInt(req.params.store, 10)
-      let id = req.params.id
+      const store = parseInt(req.params.store, 10)
+      const id = req.params.id
 
       if (store > 100) {
         redisClient.get(store + '_' + id, (err, profile) => {
@@ -365,7 +367,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                   res.json(out)
                 }
 
-                let handleError = (msg) => {
+                const handleError = (msg) => {
                   if (msg) {
                     res.status(400).json({
                       'status': 400,
@@ -386,7 +388,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                   verifiedEmail = profile.emails[0].value
                 }
 
-                let callback = (err, customer, msg) => {
+                const callback = (err, customer, msg) => {
                   if (!err) {
                     if (customer) {
                       returnToken(customer)
@@ -427,47 +429,47 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       }
     }
 
-    let setupStrategy = (credentials, provider, Strategy, storeId) => {
+    const setupStrategy = (credentials, provider, Strategy, storeId) => {
       if (typeof credentials === 'object' && credentials !== null && credentials.clientID !== '') {
         let endpoint = provider
         if (storeId) {
           // add store ID on strategy endpoint
           endpoint += '-' + storeId
         }
-        let path = config.baseUri + endpoint
+        const path = config.baseUri + endpoint
 
-        let strategyConfig = {
+        const strategyConfig = {
           // OAuth 2.0 auth
           'clientID': credentials.clientID,
           'clientSecret': credentials.clientSecret,
           // same callback pattern always
           'callbackURL': config.host + path + '/callback.html'
         }
-        if (Strategy.hasOwnProperty('profileFields')) {
+        if (Strategy.profileFields !== undefined) {
           strategyConfig.profileFields = Strategy.profileFields
         }
 
-        let strategyCallback = (accessToken, refreshToken, profile, done) => {
-          let user = {}
+        const strategyCallback = (accessToken, refreshToken, profile, done) => {
+          const user = {}
           user.profile = profile
           // return authenticated
           return done(null, user)
         }
-        let strategy = new Strategy.Init(strategyConfig, strategyCallback)
+        const strategy = new Strategy.Init(strategyConfig, strategyCallback)
         // logger.log(strategy._oauth2)
 
         // add strategy middleware
         passport.use(endpoint, strategy)
 
         // authenticate strategy options
-        let options = {
+        const options = {
           'session': false
         }
-        if (Strategy.hasOwnProperty('scope')) {
+        if (Strategy.scope !== undefined) {
           options.scope = Strategy.scope
         }
 
-        let strategyAuthenticate = passport.authenticate(endpoint, options)
+        const strategyAuthenticate = passport.authenticate(endpoint, options)
         if (!storeId) {
           // generic only
           app.get(path + '/:store/:id/:sig/oauth', oauthStart, strategyAuthenticate)
@@ -486,11 +488,11 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     // should work with or without provider on URI
     app.get(config.baseUri + '(*/)?:store/:id/token.json', oauthProfile)
 
-    for (let provider in strategies) {
-      if (Strategies.hasOwnProperty(provider) && strategies.hasOwnProperty(provider)) {
+    for (const provider in strategies) {
+      if (Strategies[provider] !== undefined && strategies[provider] !== undefined) {
         // setup default strategies
-        let credentials = strategies[provider]
-        let Strategy = Strategies[provider]
+        const credentials = strategies[provider]
+        const Strategy = Strategies[provider]
         setupStrategy(credentials, provider, Strategy)
       }
     }
@@ -498,27 +500,27 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     // initialize Passport
     app.use(passport.initialize())
 
-    let setupCustomStrategies = () => {
+    const setupCustomStrategies = () => {
       // wait 10 minutes
       setTimeout(() => {
         stores.list((stores) => {
           if (Array.isArray(stores)) {
             let done = 0
-            let size = stores.length
+            const size = stores.length
 
             for (let i = 0; i < size; i++) {
-              let storeId = stores[i].id
+              const storeId = stores[i].id
               // delay to prevent rating limit
               setTimeout(() => {
                 api.getProviders(storeId, (err, providers) => {
                   if (!err && typeof providers === 'object' && providers !== null) {
-                    for (let provider in providers) {
-                      if (providers.hasOwnProperty(provider)) {
-                        let app = providers[provider]
+                    for (const provider in providers) {
+                      if (providers[provider]) {
+                        const app = providers[provider]
                         if (app && app.client_id && app.client_secret) {
                           // check if it is already setted
-                          let storeStrategies = customStrategies[storeId]
-                          let key = app.client_id + app.client_secret
+                          const storeStrategies = customStrategies[storeId]
+                          const key = app.client_id + app.client_secret
                           if (storeStrategies) {
                             if (storeStrategies[provider] === key) {
                               // already setted
@@ -532,10 +534,10 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                             }
                           }
 
-                          let Strategy = Strategies[provider]
+                          const Strategy = Strategies[provider]
                           if (Strategy !== undefined) {
                             // setup strategy with store custom oauth app
-                            let credentials = {
+                            const credentials = {
                               'clientID': app.client_id,
                               'clientSecret': app.client_secret
                             }
@@ -562,16 +564,16 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       }, 600000)
     }
     // store custom strategies already setted
-    let customStrategies = {}
+    const customStrategies = {}
     setupCustomStrategies()
 
     // route custom strategies
     app.get(config.baseUri + ':provider(*)-:store(*)/:st/:id/:sig/oauth', (req, res, next) => {
-      let store = req.params.store
+      const store = req.params.store
       // check if store ID match twice on URL
       if (store === req.params.st) {
-        let storeStrategies = customStrategies[store]
-        let provider = req.params.provider
+        const storeStrategies = customStrategies[store]
+        const provider = req.params.provider
         // check if custom strategy is setted up
         if (storeStrategies && storeStrategies[provider]) {
           // continue as express middlewares
@@ -586,9 +588,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     })
 
     app.get(config.baseUri + ':provider(*)-:store(*)/callback.html', (req, res, next) => {
-      let store = req.params.store
-      let storeStrategies = customStrategies[store]
-      let provider = req.params.provider
+      const store = req.params.store
+      const storeStrategies = customStrategies[store]
+      const provider = req.params.provider
       // check if custom strategy is setted up
       if (storeStrategies && storeStrategies[provider]) {
         // continue as express middlewares
