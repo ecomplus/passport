@@ -10,12 +10,11 @@
   "license": "GPL-3.0",
   "private": true,
   "dependencies": {
-    "ejs": "2.x",
-    "express": "4.x",
     "body-parser": "1.x",
     "cookie-parser": "1.x",
+    "ejs": "2.x",
+    "express": "4.x",
     "jwt-simple": "0.5.x",
-    "moment": "2.x",
     "passport": "0.4.x",
     "passport-facebook": "2.x",
     "passport-google-oauth20": "2.x",
@@ -23,11 +22,11 @@
     "redis": "2.x"
   },
   "devDependencies": {
-    "@commitlint/cli": "^8.3.5",
-    "@commitlint/config-conventional": "^8.3.4",
-    "husky": "^3.1.0",
-    "standard": "^14.3.3",
-    "standard-version": "^7.1.0"
+    "@commitlint/cli": "^12.1.1",
+    "@commitlint/config-conventional": "^12.1.1",
+    "husky": "^4.3.8",
+    "standard": "^16.0.3",
+    "standard-version": "^9.3.0"
   },
   "husky": {
     "hooks": {
