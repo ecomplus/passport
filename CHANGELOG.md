@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.21](https://github.com/ecomplus/passport/compare/v0.1.20...v0.1.21) (2021-05-10)
+
+
+### Bug Fixes
+
+* **deps:** update all, remove unecessary moment ([30df04e](https://github.com/ecomplus/passport/commit/30df04e32354bb6670e3268c6929f650b7be2b06))
+* **facebook-scope:** remove 'birthday' field (blocked by fb due to lgpd updates) ([4eac116](https://github.com/ecomplus/passport/commit/4eac116456bb06eec029de86cdbca3dac5dac635))
+
 ### [0.1.20](https://github.com/ecomplus/passport/compare/v0.1.19...v0.1.20) (2020-05-16)
 
 
