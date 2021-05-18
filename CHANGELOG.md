@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.23](https://github.com/ecomplus/passport/compare/v0.1.22...v0.1.23) (2021-05-18)
+
+
+### Bug Fixes
+
+* **auth:** prevent breaking current access tokens (level prop) ([24e3345](https://github.com/ecomplus/passport/commit/24e3345b028e89cd8342142ee426f479fa348370))
+
 ### [0.1.22](https://github.com/ecomplus/passport/compare/v0.1.21...v0.1.22) (2021-05-18)
 
 
