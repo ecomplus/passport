@@ -68,7 +68,7 @@ module.exports = (app, baseUri) => {
 
     if (accessToken && customerId) {
       // check token
-      const authLevel = auth.validate(customerId, storeId, accessToken)
+      const { authLevel, canCreateOrder } = auth.validate(customerId, storeId, accessToken)
       if (typeof authLevel === 'number' && authLevel > 0) {
         // authenticated
         // check authorization level
@@ -78,6 +78,7 @@ module.exports = (app, baseUri) => {
           // save authentication and continue
           req.customer = customerId
           req.authLevel = authLevel
+          req.canCreateOrder = canCreateOrder
           next()
         } else {
           const errMsg = 'Unauthorized, no permission for this request'
@@ -114,8 +115,14 @@ module.exports = (app, baseUri) => {
 
   app.use(baseUri + '/:resource([^/]+)(/:id)?(/:path)?.json', (req, res) => {
     // treat API endpoints
+    const { resource } = req.params
+    const method = req.method.toLowerCase()
+    if (req.canCreateOrder === false && resource === 'orders' && method === 'post') {
+      return sendError(res, 401, 1510, 'Your customer account is temporarily disabled to make new orders')
+    }
+
     let endpoint
-    switch (req.params.resource) {
+    switch (resource) {
       case 'carts':
       case 'orders':
         if (req.method.toLowerCase() === 'delete') {

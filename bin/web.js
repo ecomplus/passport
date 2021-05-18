@@ -319,6 +319,11 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       res.sendFile(root + '/assets/app/callback.html')
     }
 
+    const blockLogin = res => res.status(401).json({
+      status: 401,
+      error: 'Unauthorized, profile found but unable to login'
+    })
+
     const oauthProfile = (req, res, next) => {
       // check if id is the same of stored
       const store = parseInt(req.params.store, 10)
@@ -352,6 +357,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                 }
 
                 const returnToken = (customer) => {
+                  if (customer.login === false) {
+                    return blockLogin(res)
+                  }
                   // maximum auth level
                   const level = 3
                   const out = {
@@ -360,7 +368,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                     // generate jwt
                     auth: {
                       id: customer._id,
-                      token: auth.generateToken(store, customer._id, level),
+                      token: auth.generateToken(store, customer._id, level, customer.enabled),
                       level
                     }
                   }
@@ -626,12 +634,15 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
 
       api.findCustomerByEmail(storeId, email, docNumber, (err, id, customer) => {
         if (!err && typeof customer === 'object' && customer !== null) {
+          if (customer.login === false) {
+            return blockLogin(res)
+          }
           let token
           let level = 0
           if (docNumber) {
             // generate jwt with auth level 2
             level = 2
-            token = auth.generateToken(storeId, customer._id, level)
+            token = auth.generateToken(storeId, customer._id, level, customer.enabled)
           } else {
             // no token for email only authentication
             token = null
