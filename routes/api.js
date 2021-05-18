@@ -131,7 +131,7 @@ module.exports = (app, baseUri) => {
         }
 
         // mount endpoint parts
-        endpoint = req.params.resource
+        endpoint = resource
         ;['id', 'path'].forEach(param => {
           if (req.params[param]) {
             endpoint += '/' + req.params[param]
@@ -144,7 +144,7 @@ module.exports = (app, baseUri) => {
           req.params.store,
           req.customer,
           req.method.toUpperCase(),
-          req.params.resource,
+          resource,
           req.params.id,
           endpoint,
           req.body,
