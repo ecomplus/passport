@@ -68,7 +68,13 @@ module.exports = (app, baseUri) => {
 
     if (accessToken && customerId) {
       // check token
-      const { authLevel, canCreateOrder } = auth.validate(customerId, storeId, accessToken)
+      const {
+        authLevel,
+        canCreateOrder,
+        error,
+        message
+      } = auth.validate(customerId, storeId, accessToken)
+
       if (typeof authLevel === 'number' && authLevel > 0) {
         // authenticated
         // check authorization level
@@ -86,7 +92,6 @@ module.exports = (app, baseUri) => {
         }
       } else {
         // unauthorized
-        const { error, message } = authLevel
         sendError(res, 401, 800 + error, message)
       }
     } else {
