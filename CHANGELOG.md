@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.24](https://github.com/ecomplus/passport/compare/v0.1.23...v0.1.24) (2021-05-18)
+
+
+### Bug Fixes
+
+* **api-routes:** fix handling auth validation errors ([b05fa0b](https://github.com/ecomplus/passport/commit/b05fa0b326e3191fd9b0d6dd55755de0b742a7e6))
+
 ### [0.1.23](https://github.com/ecomplus/passport/compare/v0.1.22...v0.1.23) (2021-05-18)
 
 
