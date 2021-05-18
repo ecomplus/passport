@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.22](https://github.com/ecomplus/passport/compare/v0.1.21...v0.1.22) (2021-05-18)
+
+
+### Bug Fixes
+
+* **api:** delete (do not permit) loyalty points properties ([2c4eabc](https://github.com/ecomplus/passport/commit/2c4eabce2254cc6129342eb7f0120f1240b221f3))
+* **auth:** check for disabled customer login/checkout ([#12](https://github.com/ecomplus/passport/issues/12)) ([21d5bb4](https://github.com/ecomplus/passport/commit/21d5bb40a9dbdb8296519dfbe1e760d1b372a86f))
+
 ### [0.1.21](https://github.com/ecomplus/passport/compare/v0.1.20...v0.1.21) (2021-05-10)
 
 
