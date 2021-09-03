@@ -19,7 +19,7 @@
     "passport-facebook": "2.x",
     "passport-google-oauth20": "2.x",
     "passport-windowslive": "1.x",
-    "redis": "2.x"
+    "redis": "3.x"
   },
   "devDependencies": {
     "@commitlint/cli": "^12.1.4",
