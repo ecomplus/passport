@@ -139,15 +139,17 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       res.status(400).send('Invalid request ID, must follow RegEx pattern ^[\\w.]{32}$')
     }
 
-    const listProviders = body => {
+    const listProviders = store => {
       const strategies = Object.assign({}, config.strategies)
-      // check custom store strategies
-      const customStrategies = body.oauth_providers
-      if (typeof customStrategies === 'object' && customStrategies !== null) {
-        for (const provider in customStrategies) {
-          if (customStrategies[provider] !== undefined && strategies[provider] !== undefined) {
-            // mark custom store oauth app
-            strategies[provider].customStrategy = true
+      if (!store.$main || store.$main.plan !== 0) {
+        // check custom store strategies
+        const customStrategies = store.oauth_providers
+        if (typeof customStrategies === 'object' && customStrategies) {
+          for (const provider in customStrategies) {
+            if (customStrategies[provider] !== undefined && strategies[provider] !== undefined) {
+              // mark custom store oauth app
+              strategies[provider].customStrategy = true
+            }
           }
         }
       }
@@ -191,7 +193,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             // show or hide link to skip login
             const enableSkip = Boolean(req.query.enable_skip)
 
-            // ref.: https://ecomstore.docs.apiary.io/#reference/stores/store-object
+            // ref.: https://developers.e-com.plus/docs/api/#/store/stores/stores
             const store = {
               id: storeId,
               name: body.name
