@@ -2,7 +2,7 @@
 E-Com Plus service for customer login and signup with Passportjs
 
 # Technology stack
-+ [NodeJS](https://nodejs.org/en/) 8.9.x
++ [NodeJS](https://nodejs.org/en/) 12+
 + [Express](http://expressjs.com/) web framework package
 + [Passport](http://www.passportjs.org/) package
 + OAuth strategies: Facebook, Google, Twitter, Instagram, Yahoo and Windows Live
