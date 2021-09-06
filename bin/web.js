@@ -354,15 +354,17 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                 // remove cookies
                 res.clearCookie('_passport_' + store + '_id')
 
-                try {
-                  profile = JSON.parse(profile)
-                } catch (e) {
-                  // invalid JSON
-                  res.status(403).json({
-                    'status': 403,
-                    'error': 'Forbidden, invalid profile object, restart the OAuth flux'
-                  })
-                  return
+                if (typeof profile === 'string') {
+                  try {
+                    profile = JSON.parse(profile)
+                  } catch (e) {
+                    // invalid JSON
+                    res.status(403).json({
+                      'status': 403,
+                      'error': 'Forbidden, invalid profile object, restart the OAuth flux'
+                    })
+                    return
+                  }
                 }
 
                 const returnToken = (customer) => {
