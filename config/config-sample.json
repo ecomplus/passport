@@ -25,6 +25,10 @@
       "faIcon": "fa-windows"
     }
   },
+  "mailjet": {
+    "publicKey": "",
+    "privateKey": ""
+  },
   "jwtSecret": "abcdef",
   "apiHost": "127.0.0.1",
   "apiBaseUri": "/v1/",
