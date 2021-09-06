@@ -326,13 +326,20 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       error: 'Unauthorized, profile found but unable to login'
     })
 
+    const redisError = (res, err) => {
+      res.status(500).json({
+        'status': 500,
+        'error': 'Internal server error (Redis client)'
+      })
+    }
+
     const oauthProfile = (req, res, next) => {
       // check if id is the same of stored
       const store = parseInt(req.params.store, 10)
       const id = req.params.id
 
       if (store > 100) {
-        redisClient.get(store + '_' + id, (err, profile) => {
+        const handleProfile = (err, profile) => {
           if (!err) {
             // reply is null when the key is missing
             if (profile === null) {
@@ -425,12 +432,15 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
               }
             }
           } else {
-            res.status(500).json({
-              'status': 500,
-              'error': 'Internal server error (Redis client)'
-            })
+            redisError(res, err)
           }
-        })
+        }
+
+        if (req.profile && req.profile.emails) {
+          handleProfile(null, req.profile)
+        } else {
+          redisClient.get(store + '_' + id, handleProfile)
+        }
       } else {
         res.status(401).json({
           'status': 401,
@@ -612,6 +622,106 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       // nothing to do, pass to next middleware
       next()
     })
+
+    if (config.mailjet && config.mailjet.privateKey) {
+      // handle login/sigup with email code verification
+      const emailValidator = require('email-validator')
+      const mailjet = require('node-mailjet').connect(config.mailjet.publicKey, config.mailjet.privateKey)
+
+      app.put(config.baseUri + ':lang/:store/email-code', (req, res, next) => {
+        const { lang, email } = req.body.email
+        const storeId = parseInt(req.params.store, 10)
+        if (email && storeId > 100 && emailValidator.validate(email)) {
+          return redisClient.get(email, (err, emailSession) => {
+            if (!err) {
+              const tmpSession = emailSession && JSON.parse(emailSession)
+              const timestamp = Date.now()
+              if (
+                !tmpSession ||
+                timestamp - tmpSession.timestamp >= 120000 ||
+                (storeId !== tmpSession.storeId && timestamp - tmpSession.timestamp >= 5000)
+              ) {
+                // new email session code
+                const code = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000
+
+                // get store info
+                return api.readStore(storeId, (err, store) => {
+                  if (!err && typeof store === 'object' && store) {
+                    const codeMsg = lang === 'pt_br'
+                      ? ` é o seu código para login na ${store.name}`
+                      : ` is your ${store.name} login code`
+
+                    // send new code by email
+                    mailjet.post('send', {
+                      version: 'v3.1'
+                    }).request({
+                      Messages: [{
+                        From: {
+                          Email: 'noreply@e-com.club',
+                          Name: store.name
+                        },
+                        ReplyTo: store.contact_email,
+                        To: [{ Email: email }],
+                        Subject: code + codeMsg,
+                        TextPart: code + codeMsg,
+                        HTMLPart: `<b>${code}</b>&nbsp;${codeMsg}.<br/><br/>${(store.logo ? `<img src="${store.logo}"/>` : '')}`
+                      }]
+                    }).then(() => {
+                      // save key on redis on 10 minutes expiration
+                      redisClient.set(email, JSON.stringify({ storeId, code, timestamp }), 'EX', 600)
+                      res.status(204).end()
+                    }).catch(err => {
+                      logger.error(err)
+                      next(err)
+                    })
+                  } else {
+                    res.status(404).send('Store not found')
+                  }
+                })
+              }
+              return res.status(204).end()
+            }
+            redisError(res, err)
+          })
+        }
+        res.status(400).json({
+          status: 400,
+          error: 'Invalid Store ID or email address'
+        })
+      })
+
+      // profile with email + code login
+      app.post(config.baseUri + ':store/:id/token.json', (req, res, next) => {
+        const { email, code } = req.body.email
+        if (code > 99999 && email && emailValidator.validate(email)) {
+          return redisClient.get(email, (err, emailSession) => {
+            if (!err) {
+              if (emailSession && JSON.parse(emailSession).code === code) {
+                // mock Passport profile object
+                req.profile = {
+                  emails: [{
+                    value: email
+                  }],
+                  provider: 'email',
+                  id: '0'
+                }
+                return oauthProfile(req, res, next)
+              }
+              res.status(403).json({
+                status: 403,
+                error: 'Forbidden, code not matching with email address'
+              })
+            } else {
+              redisError(res, err)
+            }
+          })
+        }
+        res.status(400).json({
+          status: 400,
+          error: 'Invalid email address or code on request data'
+        })
+      })
+    }
 
     // open REST API
     require('./../routes/api.js')(app, config.baseUri)
