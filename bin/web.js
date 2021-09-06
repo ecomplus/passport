@@ -652,7 +652,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                       : ` is your ${store.name} login code`
 
                     // send new code by email
-                    mailjet.post('send', {
+                    return mailjet.post('send', {
                       version: 'v3.1'
                     }).request({
                       Messages: [{
@@ -674,9 +674,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                       logger.error(err)
                       next(err)
                     })
-                  } else {
-                    res.status(404).send('Store not found')
                   }
+
+                  res.status(404).send('Store not found')
                 })
               }
               return res.status(204).end()
