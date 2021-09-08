@@ -670,7 +670,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                         To: [{ Email: email }],
                         Subject: code + (isPt ? ' é o seu código para login' : ' is your login code'),
                         TextPart: `${code} ${codeMsg}`,
-                        HTMLPart: `${(isPt ? 'Olá' : 'Hello')},<h1>${code}</h1>` +
+                        HTMLPart: `${(isPt ? 'Olá' : 'Hello')}, <h1>${code}</h1>` +
                           `${codeMsg}.<br/><br/>${(store.logo ? `<img src="${store.logo}"/>` : '')}`
                       }]
                     }).then(() => {
