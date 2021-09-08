@@ -139,15 +139,17 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       res.status(400).send('Invalid request ID, must follow RegEx pattern ^[\\w.]{32}$')
     }
 
-    const listProviders = body => {
+    const listProviders = store => {
       const strategies = Object.assign({}, config.strategies)
-      // check custom store strategies
-      const customStrategies = body.oauth_providers
-      if (typeof customStrategies === 'object' && customStrategies !== null) {
-        for (const provider in customStrategies) {
-          if (customStrategies[provider] !== undefined && strategies[provider] !== undefined) {
-            // mark custom store oauth app
-            strategies[provider].customStrategy = true
+      if (!store.$main || store.$main.plan !== 0) {
+        // check custom store strategies
+        const customStrategies = store.oauth_providers
+        if (typeof customStrategies === 'object' && customStrategies) {
+          for (const provider in customStrategies) {
+            if (customStrategies[provider] !== undefined && strategies[provider] !== undefined) {
+              // mark custom store oauth app
+              strategies[provider].customStrategy = true
+            }
           }
         }
       }
@@ -191,7 +193,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             // show or hide link to skip login
             const enableSkip = Boolean(req.query.enable_skip)
 
-            // ref.: https://ecomstore.docs.apiary.io/#reference/stores/store-object
+            // ref.: https://developers.e-com.plus/docs/api/#/store/stores/stores
             const store = {
               id: storeId,
               name: body.name
@@ -324,13 +326,20 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       error: 'Unauthorized, profile found but unable to login'
     })
 
+    const redisError = (res, err) => {
+      res.status(500).json({
+        'status': 500,
+        'error': 'Internal server error (Redis client)'
+      })
+    }
+
     const oauthProfile = (req, res, next) => {
       // check if id is the same of stored
       const store = parseInt(req.params.store, 10)
       const id = req.params.id
 
       if (store > 100) {
-        redisClient.get(store + '_' + id, (err, profile) => {
+        const handleProfile = (err, profile) => {
           if (!err) {
             // reply is null when the key is missing
             if (profile === null) {
@@ -345,15 +354,17 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                 // remove cookies
                 res.clearCookie('_passport_' + store + '_id')
 
-                try {
-                  profile = JSON.parse(profile)
-                } catch (e) {
-                  // invalid JSON
-                  res.status(403).json({
-                    'status': 403,
-                    'error': 'Forbidden, invalid profile object, restart the OAuth flux'
-                  })
-                  return
+                if (typeof profile === 'string') {
+                  try {
+                    profile = JSON.parse(profile)
+                  } catch (e) {
+                    // invalid JSON
+                    res.status(403).json({
+                      'status': 403,
+                      'error': 'Forbidden, invalid profile object, restart the OAuth flux'
+                    })
+                    return
+                  }
                 }
 
                 const returnToken = (customer) => {
@@ -423,12 +434,15 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
               }
             }
           } else {
-            res.status(500).json({
-              'status': 500,
-              'error': 'Internal server error (Redis client)'
-            })
+            redisError(res, err)
           }
-        })
+        }
+
+        if (req.profile && req.profile.emails) {
+          handleProfile(null, req.profile)
+        } else {
+          redisClient.get(store + '_' + id, handleProfile)
+        }
       } else {
         res.status(401).json({
           'status': 401,
@@ -610,6 +624,112 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       // nothing to do, pass to next middleware
       next()
     })
+
+    if (config.mailjet && config.mailjet.privateKey) {
+      // handle login/sigup with email code verification
+      const emailValidator = require('email-validator')
+      const mailjet = require('node-mailjet').connect(config.mailjet.publicKey, config.mailjet.privateKey)
+
+      app.put(config.baseUri + ':lang/:store/email-code', (req, res, next) => {
+        const { email } = req.body
+        const storeId = parseInt(req.params.store, 10)
+        if (email && storeId > 100 && emailValidator.validate(email)) {
+          const { lang } = req.params
+          return redisClient.get(email, (err, emailSession) => {
+            if (!err) {
+              const tmpSession = emailSession && JSON.parse(emailSession)
+              const timestamp = Date.now()
+              if (
+                !tmpSession ||
+                timestamp - tmpSession.timestamp >= 120000 ||
+                (storeId !== tmpSession.storeId && timestamp - tmpSession.timestamp >= 5000)
+              ) {
+                // new email session code
+                const code = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000
+
+                // get store info
+                return api.readStore(storeId, (err, store) => {
+                  if (!err && typeof store === 'object' && store) {
+                    const isPt = lang === 'pt_br'
+                    const codeMsg = isPt
+                      ? ` é o seu código temporário para login na ${store.name}`
+                      : ` is your temporary ${store.name} login code`
+
+                    // send new code by email
+                    return mailjet.post('send', {
+                      version: 'v3.1'
+                    }).request({
+                      Messages: [{
+                        From: {
+                          Email: 'noreply@e-com.club',
+                          Name: (store.name.trim().substring(0, 38) || 'Loja') +
+                            ` [${(isPt ? 'automático' : 'automatic')}]`
+                        },
+                        ReplyTo: {
+                          Email: store.contact_email
+                        },
+                        To: [{ Email: email }],
+                        Subject: code + (isPt ? ' é o seu código para login' : ' is your login code'),
+                        TextPart: `${code} ${codeMsg}`,
+                        HTMLPart: `${(isPt ? 'Olá' : 'Hello')}, <h1>${code}</h1>` +
+                          `${codeMsg}.<br/><br/>${(store.logo ? `<img src="${store.logo}"/>` : '')}`
+                      }]
+                    }).then(() => {
+                      // save key on redis on 10 minutes expiration
+                      redisClient.set(email, JSON.stringify({ storeId, code, timestamp }), 'EX', 600)
+                      res.status(204).end()
+                    }).catch(err => {
+                      logger.error(err)
+                      next(err)
+                    })
+                  }
+
+                  res.status(404).send('Store not found')
+                })
+              }
+              return res.status(204).end()
+            }
+            redisError(res, err)
+          })
+        }
+        res.status(400).json({
+          status: 400,
+          error: 'Invalid Store ID or email address'
+        })
+      })
+
+      // profile with email + code login
+      app.post(config.baseUri + ':store/:id/token.json', (req, res, next) => {
+        const { email, code } = req.body
+        if (code > 99999 && email && emailValidator.validate(email)) {
+          return redisClient.get(email, (err, emailSession) => {
+            if (!err) {
+              if (emailSession && JSON.parse(emailSession).code === code) {
+                // mock Passport profile object
+                req.profile = {
+                  emails: [{
+                    value: email
+                  }],
+                  provider: 'email',
+                  id: '0'
+                }
+                return oauthProfile(req, res, next)
+              }
+              res.status(403).json({
+                status: 403,
+                error: 'Forbidden, code not matching with email address'
+              })
+            } else {
+              redisError(res, err)
+            }
+          })
+        }
+        res.status(400).json({
+          status: 400,
+          error: 'Invalid email address or code on request data'
+        })
+      })
+    }
 
     // open REST API
     require('./../routes/api.js')(app, config.baseUri)

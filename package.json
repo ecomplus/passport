@@ -13,13 +13,15 @@
     "body-parser": "1.x",
     "cookie-parser": "1.x",
     "ejs": "2.x",
+    "email-validator": "^2.0.4",
     "express": "4.x",
     "jwt-simple": "0.5.x",
+    "node-mailjet": "^3.3.4",
     "passport": "0.4.x",
     "passport-facebook": "2.x",
     "passport-google-oauth20": "2.x",
     "passport-windowslive": "1.x",
-    "redis": "3.x"
+    "redis": "^3.1.2"
   },
   "devDependencies": {
     "@commitlint/cli": "^12.1.4",
