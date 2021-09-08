@@ -652,8 +652,8 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                   if (!err && typeof store === 'object' && store) {
                     const isPt = lang === 'pt_br'
                     const codeMsg = isPt
-                      ? `é o seu código temporário para login na ${store.name}`
-                      : `is your temporary ${store.name} login code`
+                      ? ` é o seu código temporário para login na ${store.name}`
+                      : ` is your temporary ${store.name} login code`
 
                     // send new code by email
                     return mailjet.post('send', {
@@ -670,7 +670,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                         To: [{ Email: email }],
                         Subject: code + (isPt ? ' é o seu código para login' : ' is your login code'),
                         TextPart: `${code} ${codeMsg}`,
-                        HTMLPart: `${(isPt ? 'Olá' : 'Hello')},<br/><br/><h1>${code}</h1>` +
+                        HTMLPart: `${(isPt ? 'Olá' : 'Hello')},<h1>${code}</h1>` +
                           `${codeMsg}.<br/><br/>${(store.logo ? `<img src="${store.logo}"/>` : '')}`
                       }]
                     }).then(() => {
