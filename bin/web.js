@@ -650,9 +650,10 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                 // get store info
                 return api.readStore(storeId, (err, store) => {
                   if (!err && typeof store === 'object' && store) {
-                    const codeMsg = lang === 'pt_br'
-                      ? `é o seu código para login na ${store.name}`
-                      : `is your ${store.name} login code`
+                    const isPt = lang === 'pt_br'
+                    const codeMsg = isPt
+                      ? `é o seu código temporário para login na ${store.name}`
+                      : `is your temporary ${store.name} login code`
 
                     // send new code by email
                     return mailjet.post('send', {
@@ -661,16 +662,15 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                       Messages: [{
                         From: {
                           Email: 'noreply@e-com.club',
-                          Name: store.name
+                          Name: `${(store.name.trim() || 'Loja')} [${(isPt ? 'automático' : 'automatic')}]`
                         },
                         ReplyTo: {
-                          Email: store.contact_email,
-                          Name: store.name
+                          Email: store.contact_email
                         },
                         To: [{ Email: email }],
-                        Subject: code + (lang === 'pt_br' ? ' é o seu código para login' : ' is your login code'),
+                        Subject: code + (isPt ? ' é o seu código para login' : ' is your login code'),
                         TextPart: `${code} ${codeMsg}`,
-                        HTMLPart: `${(lang === 'pt_br' ? 'Olá' : 'Hello')},<br/><br/><h1>${code}</h1>` +
+                        HTMLPart: `${(isPt ? 'Olá' : 'Hello')},<br/><br/><h1>${code}</h1>` +
                           `${codeMsg}.<br/><br/>${(store.logo ? `<img src="${store.logo}"/>` : '')}`
                       }]
                     }).then(() => {
