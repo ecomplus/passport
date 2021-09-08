@@ -631,9 +631,10 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       const mailjet = require('node-mailjet').connect(config.mailjet.publicKey, config.mailjet.privateKey)
 
       app.put(config.baseUri + ':lang/:store/email-code', (req, res, next) => {
-        const { lang, email } = req.body.email
+        const { email } = req.body
         const storeId = parseInt(req.params.store, 10)
         if (email && storeId > 100 && emailValidator.validate(email)) {
+          const { lang } = req.params
           return redisClient.get(email, (err, emailSession) => {
             if (!err) {
               const tmpSession = emailSession && JSON.parse(emailSession)
