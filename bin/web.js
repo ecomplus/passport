@@ -699,7 +699,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
 
       // profile with email + code login
       app.post(config.baseUri + ':store/:id/token.json', (req, res, next) => {
-        const { email, code } = req.body.email
+        const { email, code } = req.body
         if (code > 99999 && email && emailValidator.validate(email)) {
           return redisClient.get(email, (err, emailSession) => {
             if (!err) {
