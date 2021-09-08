@@ -651,8 +651,8 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                 return api.readStore(storeId, (err, store) => {
                   if (!err && typeof store === 'object' && store) {
                     const codeMsg = lang === 'pt_br'
-                      ? ` é o seu código para login na ${store.name}`
-                      : ` is your ${store.name} login code`
+                      ? `é o seu código para login na ${store.name}`
+                      : `is your ${store.name} login code`
 
                     // send new code by email
                     return mailjet.post('send', {
@@ -668,9 +668,10 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                           Name: store.name
                         },
                         To: [{ Email: email }],
-                        Subject: code + codeMsg,
-                        TextPart: code + codeMsg,
-                        HTMLPart: `<b>${code}</b>&nbsp;${codeMsg}.<br/><br/>${(store.logo ? `<img src="${store.logo}"/>` : '')}`
+                        Subject: code + (lang === 'pt_br' ? ' é o seu código para login' : ' is your login code'),
+                        TextPart: `${code} ${codeMsg}`,
+                        HTMLPart: `${(lang === 'pt_br' ? 'Olá' : 'Hello')},<br/><br/><h1>${code}</h1>` +
+                          `${codeMsg}.<br/><br/>${(store.logo ? `<img src="${store.logo}"/>` : '')}`
                       }]
                     }).then(() => {
                       // save key on redis on 10 minutes expiration
