@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.25](https://github.com/ecomplus/passport/compare/v0.1.24...v0.1.25) (2021-09-08)
+
+
+### Features
+
+* **web:** add/handle endpoints for login with email code verification ([61c0e62](https://github.com/ecomplus/passport/commit/61c0e622801ceb86124d6417bf9ab4e31e969e0e))
+
+
+### Bug Fixes
+
+* **email-code-token:** properly get email and code from request body ([db8002d](https://github.com/ecomplus/passport/commit/db8002da2967620edf70ede14a37afd6bee32e56))
+* **email-code:** fix getting email and lang fields from request body/params ([f4a9b3d](https://github.com/ecomplus/passport/commit/f4a9b3d9ddfc928676e0fb01f776ac8fbe72d914))
+* **email-code:** fix mailjet send api body (`ReplyTo` object) ([62f5a30](https://github.com/ecomplus/passport/commit/62f5a30b230330897c3d6ac701fbda5c1d504852))
+* **web:** check `profile` type string before json parse ([fff5aaf](https://github.com/ecomplus/passport/commit/fff5aaf6afc7d872e88fbc13cc028899a9de4c61))
+
 ### [0.1.24](https://github.com/ecomplus/passport/compare/v0.1.23...v0.1.24) (2021-05-18)
 
 
