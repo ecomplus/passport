@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.0](https://github.com/ecomplus/passport/compare/v0.1.25...v0.2.0) (2021-09-08)
+
+
+### Bug Fixes
+
+* **email-code:** fix setting logo image src on email html ([65239b9](https://github.com/ecomplus/passport/commit/65239b9b997947227b1fd3ea61e774be3fb92228))
+
 ### [0.1.25](https://github.com/ecomplus/passport/compare/v0.1.24...v0.1.25) (2021-09-08)
 
 
