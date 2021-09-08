@@ -663,7 +663,10 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                           Email: 'noreply@e-com.club',
                           Name: store.name
                         },
-                        ReplyTo: store.contact_email,
+                        ReplyTo: {
+                          Email: store.contact_email,
+                          Name: store.name
+                        },
                         To: [{ Email: email }],
                         Subject: code + codeMsg,
                         TextPart: code + codeMsg,
