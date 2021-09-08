@@ -662,7 +662,8 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                       Messages: [{
                         From: {
                           Email: 'noreply@e-com.club',
-                          Name: `${(store.name.trim() || 'Loja')} [${(isPt ? 'automático' : 'automatic')}]`
+                          Name: (store.name.trim().substring(0, 38) || 'Loja') +
+                            ` [${(isPt ? 'automático' : 'automatic')}]`
                         },
                         ReplyTo: {
                           Email: store.contact_email
