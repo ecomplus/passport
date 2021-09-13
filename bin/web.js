@@ -617,7 +617,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       const emailValidator = require('email-validator')
       const mailjet = require('node-mailjet').connect(config.mailjet.publicKey, config.mailjet.privateKey)
 
-      app.put(config.baseUri + ':lang/:store/email-code', (req, res, next) => {
+      app.put(config.baseUri + ':store/:lang?/email-code', (req, res, next) => {
         const { email } = req.body
         const storeId = parseInt(req.params.store, 10)
         if (email && storeId > 100 && emailValidator.validate(email)) {
