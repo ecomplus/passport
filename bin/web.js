@@ -659,7 +659,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                         Subject: code + (isPt ? ' é o seu código para login' : ' is your login code'),
                         TextPart: `${code} ${codeMsg}`,
                         HTMLPart: `${(isPt ? 'Olá' : 'Hello')}, <h1>${code}</h1>` +
-                          `${codeMsg}.<br/><br/>${(store.logo ? `<img src="${store.logo.url}"/>` : '')}`
+                          `${codeMsg}.<br/><br/>${(store.logo ? `<img src="${store.logo.url}" height="80"/>` : '')}`
                       }]
                     }).then(() => {
                       // save key on redis on 10 minutes expiration
