@@ -72,6 +72,9 @@ const Strategies = {
   }
 }
 
+// email addresses validator helper
+const emailValidator = require('email-validator')
+
 // process.cwd() can change
 // keep initial absolute path
 const root = process.cwd()
@@ -321,17 +324,23 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       res.sendFile(root + '/assets/app/callback.html')
     }
 
-    const blockLogin = res => res.status(401).json({
-      status: 401,
-      error: 'Unauthorized, profile found but unable to login'
-    })
-
-    const redisError = (res, err) => {
-      res.status(500).json({
-        'status': 500,
-        'error': 'Internal server error (Redis client)'
-      })
+    const sendError = (res, msg, status = 400) => {
+      if (msg) {
+        res.status(status).json({
+          status,
+          error: msg
+        })
+      } else {
+        res.status(500).json({
+          status: 500,
+          error: 'Internal server error'
+        })
+      }
     }
+
+    const sendRedisError = (res, err) => sendError(res, 'Internal server error (Redis client)', 500)
+
+    const blockLogin = res => sendError(res, 'Unauthorized, profile found but unable to login', 401)
 
     const oauthProfile = (req, res, next) => {
       // check if id is the same of stored
@@ -339,7 +348,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       const id = req.params.id
 
       if (store > 100) {
-        const handleProfile = (err, profile) => {
+        redisClient.get(store + '_' + id, (err, profile) => {
           if (!err) {
             // reply is null when the key is missing
             if (profile === null) {
@@ -354,17 +363,15 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                 // remove cookies
                 res.clearCookie('_passport_' + store + '_id')
 
-                if (typeof profile === 'string') {
-                  try {
-                    profile = JSON.parse(profile)
-                  } catch (e) {
-                    // invalid JSON
-                    res.status(403).json({
-                      'status': 403,
-                      'error': 'Forbidden, invalid profile object, restart the OAuth flux'
-                    })
-                    return
-                  }
+                try {
+                  profile = JSON.parse(profile)
+                } catch (e) {
+                  // invalid JSON
+                  res.status(403).json({
+                    'status': 403,
+                    'error': 'Forbidden, invalid profile object, restart the OAuth flux'
+                  })
+                  return
                 }
 
                 const returnToken = (customer) => {
@@ -386,20 +393,6 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                   res.json(out)
                 }
 
-                const handleError = (msg) => {
-                  if (msg) {
-                    res.status(400).json({
-                      'status': 400,
-                      'error': msg
-                    })
-                  } else {
-                    res.status(500).json({
-                      'status': 500,
-                      'error': 'Internal server error'
-                    })
-                  }
-                }
-
                 // find or create customer account
                 let verifiedEmail
                 if (Array.isArray(profile.emails) && profile.emails.length > 0) {
@@ -415,14 +408,14 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
                       // no account found
                       api.createCustomer(store, profile, (err, customer, msg) => {
                         if (err) {
-                          handleError(msg)
+                          sendError(res, msg)
                         } else {
                           returnToken(customer)
                         }
                       })
                     }
                   } else {
-                    handleError(msg)
+                    sendError(res, msg)
                   }
                 }
                 api.findCustomer(store, profile.provider, profile.id, verifiedEmail, callback)
@@ -434,15 +427,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
               }
             }
           } else {
-            redisError(res, err)
+            sendRedisError(res, err)
           }
-        }
-
-        if (req.profile && req.profile.emails) {
-          handleProfile(null, req.profile)
-        } else {
-          redisClient.get(store + '_' + id, handleProfile)
-        }
+        })
       } else {
         res.status(401).json({
           'status': 401,
@@ -689,44 +676,12 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
               }
               return res.status(204).end()
             }
-            redisError(res, err)
+            sendRedisError(res, err)
           })
         }
         res.status(400).json({
           status: 400,
           error: 'Invalid Store ID or email address'
-        })
-      })
-
-      // profile with email + code login
-      app.post(config.baseUri + ':store/:id/token.json', (req, res, next) => {
-        const { email, code } = req.body
-        if (code > 99999 && email && emailValidator.validate(email)) {
-          return redisClient.get(email, (err, emailSession) => {
-            if (!err) {
-              if (emailSession && JSON.parse(emailSession).code === code) {
-                // mock Passport profile object
-                req.profile = {
-                  emails: [{
-                    value: email
-                  }],
-                  provider: 'email',
-                  id: '0'
-                }
-                return oauthProfile(req, res, next)
-              }
-              res.status(403).json({
-                status: 403,
-                error: 'Forbidden, code not matching with email address'
-              })
-            } else {
-              redisError(res, err)
-            }
-          })
-        }
-        res.status(400).json({
-          status: 400,
-          error: 'Invalid email address or code on request data'
         })
       })
     }
@@ -746,42 +701,89 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     // simple authentication
     app.post(config.baseUri + ':store/identify.json', (req, res) => {
       const storeId = parseInt(req.params.store, 10)
-      // get store infor
-      // get customer infor
+      // try to get customer info by email
       const body = req.body
       const email = body.email
-      const docNumber = body.doc_number || null
+      if (email && emailValidator.validate(email)) {
+        let emailCode, docNumber
+        if (body.email_code) {
+          emailCode = parseInt(body.email_code, 10)
+        } else {
+          docNumber = body.doc_number || null
+        }
 
-      api.findCustomerByEmail(storeId, email, docNumber, (err, id, customer) => {
-        if (!err && typeof customer === 'object' && customer !== null) {
-          if (customer.login === false) {
-            return blockLogin(res)
-          }
-          let token
-          let level = 0
-          if (docNumber) {
-            // generate jwt with auth level 2
-            level = 2
-            token = auth.generateToken(storeId, customer._id, level, customer.enabled)
-          } else {
-            // no token for email only authentication
-            token = null
-          }
-          res.json({
-            customer,
-            auth: {
-              id,
-              token,
-              level
+        const identifyCustomer = (isEmailVerified = false) => {
+          api.findCustomerByEmail(storeId, email, docNumber, (err, id, customer) => {
+            const returnToken = () => {
+              if (customer.login === false) {
+                return blockLogin(res)
+              }
+              const level = isEmailVerified === true
+                ? 3
+                // try jwt with auth level 2
+                : docNumber ? 2 : 0
+              const token = level > 0
+                ? auth.generateToken(storeId, customer._id, level, customer.enabled)
+                // no token for email only authentication
+                : null
+              res.json({
+                customer,
+                auth: {
+                  id,
+                  token,
+                  level
+                }
+              })
+            }
+
+            if (!err && typeof customer === 'object' && customer !== null) {
+              returnToken()
+            } else if (isEmailVerified === true) {
+              // mock Passport profile object
+              const profile = {
+                emails: [{
+                  value: email
+                }],
+                provider: 'email',
+                id: '0'
+              }
+              // no account found
+              api.createCustomer(storeId, profile, (err, customer, msg) => {
+                if (err) {
+                  sendError(res, msg)
+                } else {
+                  returnToken(customer)
+                }
+              })
+            } else {
+              res.status(403).json({
+                status: 403,
+                error: 'Forbidden, no profile found with email provided'
+              })
             }
           })
-        } else {
-          res.status(403).json({
-            status: 403,
-            error: 'Forbidden, no profile found with email provided'
+        }
+
+        if (emailCode > 99999) {
+          // profile with email + code login
+          return redisClient.get(email, (err, emailSession) => {
+            if (!err) {
+              if (emailSession && JSON.parse(emailSession).code === emailCode) {
+                // email address verified
+                return identifyCustomer(true)
+              }
+              res.status(403).json({
+                status: 403,
+                error: 'Forbidden, code not matching with email address'
+              })
+            } else {
+              sendRedisError(res, err)
+            }
           })
         }
-      })
+        return identifyCustomer()
+      }
+      sendError(res, 'Invalid email address or code on request data')
     })
 
     // production error handler
