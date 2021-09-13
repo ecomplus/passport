@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.2](https://github.com/ecomplus/passport/compare/v0.2.1...v0.2.2) (2021-09-13)
+
+
+### Bug Fixes
+
+* **email-code:** store param must be first on route, lang is optinal ([c967e7d](https://github.com/ecomplus/passport/commit/c967e7d7aebf60f7f2df42272e206c94afc0d71f))
+
 ### [0.2.1](https://github.com/ecomplus/passport/compare/v0.2.0...v0.2.1) (2021-09-13)
 
 ## [0.2.0](https://github.com/ecomplus/passport/compare/v0.1.25...v0.2.0) (2021-09-08)
