@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.3](https://github.com/ecomplus/passport/compare/v0.2.2...v0.2.3) (2021-09-14)
+
+
+### Bug Fixes
+
+* **api:** list carts and orders sorted by update desc by default ([b8b1c5f](https://github.com/ecomplus/passport/commit/b8b1c5ffd7c370d2d6d542b23fab2edf1dec5bf9))
+
 ### [0.2.2](https://github.com/ecomplus/passport/compare/v0.2.1...v0.2.2) (2021-09-13)
 
 
