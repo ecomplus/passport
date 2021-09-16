@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.4](https://github.com/ecomplus/passport/compare/v0.2.3...v0.2.4) (2021-09-16)
+
+
+### Bug Fixes
+
+* **email-code:** endpoint json extension (optional by proxy) ([936e003](https://github.com/ecomplus/passport/commit/936e003f4b49e4820201632a109c93377efbc3b5))
+
 ### [0.2.3](https://github.com/ecomplus/passport/compare/v0.2.2...v0.2.3) (2021-09-14)
 
 
