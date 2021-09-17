@@ -714,7 +714,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
 
         const identifyCustomer = (isEmailVerified = false) => {
           api.findCustomerByEmail(storeId, email, docNumber, (err, id, customer) => {
-            const returnToken = () => {
+            const returnToken = customer => {
               if (customer.login === false) {
                 return blockLogin(res)
               }
@@ -737,7 +737,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
             }
 
             if (!err && typeof customer === 'object' && customer !== null) {
-              returnToken()
+              returnToken(customer)
             } else if (isEmailVerified === true) {
               // mock Passport profile object
               const profile = {
