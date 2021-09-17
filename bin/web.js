@@ -729,7 +729,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
               res.json({
                 customer,
                 auth: {
-                  id,
+                  id: customer._id,
                   token,
                   level
                 }
