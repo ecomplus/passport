@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.6](https://github.com/ecomplus/passport/compare/v0.2.5...v0.2.6) (2021-09-17)
+
+
+### Bug Fixes
+
+* **api:** set customer with empty `display_name` if undefined ([3b398a3](https://github.com/ecomplus/passport/commit/3b398a3633504d85dee9db162e19c7fbc6ee42a8))
+* **identify:** properly returning customer id on signup by code ([6859158](https://github.com/ecomplus/passport/commit/68591587927e18d9396d33e4a416d5404da0fb07))
+
 ### [0.2.5](https://github.com/ecomplus/passport/compare/v0.2.4...v0.2.5) (2021-09-17)
 
 
