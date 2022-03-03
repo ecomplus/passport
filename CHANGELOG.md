@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.7](https://github.com/ecomplus/passport/compare/v0.2.6...v0.2.7) (2022-03-03)
+
+
+### Bug Fixes
+
+* **find-customer-by-email:** selecting customer who ordered when more than one is found ([786d7a6](https://github.com/ecomplus/passport/commit/786d7a6cd82d758fad000ffc7c4c6d326a96317b))
+
 ### [0.2.6](https://github.com/ecomplus/passport/compare/v0.2.5...v0.2.6) (2021-09-17)
 
 
