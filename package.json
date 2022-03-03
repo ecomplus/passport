@@ -10,13 +10,13 @@
   "license": "GPL-3.0",
   "private": true,
   "dependencies": {
-    "body-parser": "1.x",
-    "cookie-parser": "1.x",
+    "body-parser": "^1.19.2",
+    "cookie-parser": "^1.4.6",
     "ejs": "2.x",
     "email-validator": "^2.0.4",
-    "express": "4.x",
+    "express": "^4.17.3",
     "jwt-simple": "0.5.x",
-    "node-mailjet": "^3.3.4",
+    "node-mailjet": "^3.3.7",
     "passport": "0.4.x",
     "passport-facebook": "2.x",
     "passport-google-oauth20": "2.x",
@@ -27,8 +27,8 @@
     "@commitlint/cli": "^12.1.4",
     "@commitlint/config-conventional": "^12.1.4",
     "husky": "^4.3.8",
-    "standard": "^16.0.3",
-    "standard-version": "^9.3.1"
+    "standard": "^16.0.4",
+    "standard-version": "^9.3.2"
   },
   "husky": {
     "hooks": {
