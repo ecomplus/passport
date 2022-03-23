@@ -152,6 +152,7 @@ module.exports = (app, baseUri) => {
           resource,
           req.params.id,
           endpoint,
+          req.originalUrl.split('?', 2)[1],
           req.body,
           Callback(res)
         )
