@@ -269,6 +269,9 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
               // create id and store cookies
               res.cookie('_passport_' + storeId + '_id', req.params.id, cookieOptions)
               res.cookie('_passport_store', storeId, cookieOptions)
+              if (req.query.referral) {
+                res.cookie('_passport_referral', req.query.referral, cookieOptions)
+              }
               // run passport
               next()
             } else {
@@ -312,6 +315,10 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           if (profile) {
             const id = req.cookies['_passport_' + store + '_id']
             if (idValidate(id, res) === true) {
+              const referral = req.cookies._passport_referral
+              if (typeof referral === 'string' && referral.length === 24) {
+                profile.referral = referral
+              }
               // save profile on redis
               // key will expire after 2 minutes
               redisClient.set(store + '_' + id, profile, 'EX', 120)
