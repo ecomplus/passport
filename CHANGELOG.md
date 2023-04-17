@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.9](https://github.com/ecomplus/passport/compare/v0.2.8...v0.2.9) (2023-04-17)
+
+
+### Features
+
+* persisting referral from url query param ([5398e9d](https://github.com/ecomplus/passport/commit/5398e9dbaf025d00e984bcb2386630b720854545))
+
 ### [0.2.8](https://github.com/ecomplus/passport/compare/v0.2.7...v0.2.8) (2022-03-23)
 
 
