@@ -119,6 +119,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
     const cookieOptions = {
       // browser session only
       expires: 0,
+      sameSite: 'none',
       // SameSite=None requires Secure
       // only sent to the server over the HTTPS protocol
       secure: true,
