@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.10](https://github.com/ecomplus/passport/compare/v0.2.9...v0.2.10) (2023-05-10)
+
+
+### Bug Fixes
+
+* **deps:** update express and body-parser non-major ([76e612d](https://github.com/ecomplus/passport/commit/76e612d8885e641fd0ddc716217323db213c3eb3))
+* ensure cookies with `SameSite=None` ([70416c7](https://github.com/ecomplus/passport/commit/70416c721cfbfeb8e4bfbd91d9622c801b0ca56d))
+
 ### [0.2.9](https://github.com/ecomplus/passport/compare/v0.2.8...v0.2.9) (2023-04-17)
 
 
