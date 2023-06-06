@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.11](https://github.com/ecomplus/passport/compare/v0.2.10...v0.2.11) (2023-06-06)
+
+
+### Features
+
+* add new /signup endpoint for for manually (post)authorized signup ([5f186e9](https://github.com/ecomplus/passport/commit/5f186e921dc409c5dfe756dcd14543ee380a28ae))
+
 ### [0.2.10](https://github.com/ecomplus/passport/compare/v0.2.9...v0.2.10) (2023-05-10)
 
 
