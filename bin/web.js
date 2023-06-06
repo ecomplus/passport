@@ -801,7 +801,7 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       const email = body.main_email
       const docNumber = body.doc_number
       if (email && emailValidator.validate(email) && docNumber && body.display_name) {
-        api.findCustomerByEmail(storeId, email, docNumber, (err, id, customer) => {
+        return api.findCustomerByEmail(storeId, email, docNumber, (err, id, customer) => {
           if (err) {
             sendError(res)
           } else if (typeof customer === 'object' && customer !== null) {
