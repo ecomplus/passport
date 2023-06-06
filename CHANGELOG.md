@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.12](https://github.com/ecomplus/passport/compare/v0.2.11...v0.2.12) (2023-06-06)
+
+
+### Bug Fixes
+
+* prevent returning error on success signup ([7de2272](https://github.com/ecomplus/passport/commit/7de22720a139f0fb0313ce48fdafa687c280a5b3))
+
 ### [0.2.11](https://github.com/ecomplus/passport/compare/v0.2.10...v0.2.11) (2023-06-06)
 
 
