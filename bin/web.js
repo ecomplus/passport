@@ -794,6 +794,44 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
       sendError(res, 'Invalid email address or code on request data')
     })
 
+    // manually (post)authorized signup
+    app.post(config.baseUri + ':store/signup.json', (req, res) => {
+      const storeId = parseInt(req.params.store, 10)
+      const body = req.body
+      const email = body.main_email
+      const docNumber = body.doc_number
+      if (email && emailValidator.validate(email) && docNumber && body.display_name) {
+        api.findCustomerByEmail(storeId, email, docNumber, (err, id, customer) => {
+          if (err) {
+            sendError(res)
+          } else if (typeof customer === 'object' && customer !== null) {
+            if (customer.login === false) {
+              return blockLogin(res)
+            }
+            const level = 2
+            const token = auth.generateToken(storeId, customer._id, level, customer.enabled)
+            res.json({
+              customer,
+              auth: {
+                id: customer._id,
+                token,
+                level
+              }
+            })
+          } else {
+            api.createCustomer(storeId, body, (err, customer, msg) => {
+              if (err) {
+                sendError(res, msg, err.statusCode)
+              } else {
+                res.json({ customer })
+              }
+            })
+          }
+        })
+      }
+      sendError(res, 'Invalid email address or missing display name or document number')
+    })
+
     // production error handler
     // no stacktraces leaked to user
     app.use((err, req, res, next) => {
