@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.13](https://github.com/ecomplus/passport/compare/v0.2.12...v0.2.13) (2023-07-03)
+
+
+### Bug Fixes
+
+* properly handling referral on oauth signup ([#20](https://github.com/ecomplus/passport/issues/20)) ([075a523](https://github.com/ecomplus/passport/commit/075a523937b8a0ba22f1ea37d83a8b8e3af33368))
+
 ### [0.2.12](https://github.com/ecomplus/passport/compare/v0.2.11...v0.2.12) (2023-06-06)
 
 
