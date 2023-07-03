@@ -310,7 +310,6 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           if (typeof referral === 'string' && referral.length === 24) {
             user.profile.referral = referral
           }
-          
           let profile
           try {
             profile = JSON.stringify(user.profile)
