@@ -306,6 +306,11 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           if (user.profile._raw) {
             delete user.profile._raw
           }
+          const referral = req.cookies._passport_referral
+          if (typeof referral === 'string' && referral.length === 24) {
+            user.profile.referral = referral
+          }
+          
           let profile
           try {
             profile = JSON.stringify(user.profile)
@@ -316,10 +321,6 @@ fs.readFile(root + '/config/config.json', 'utf8', (err, data) => {
           if (profile) {
             const id = req.cookies['_passport_' + store + '_id']
             if (idValidate(id, res) === true) {
-              const referral = req.cookies._passport_referral
-              if (typeof referral === 'string' && referral.length === 24) {
-                profile.referral = referral
-              }
               // save profile on redis
               // key will expire after 2 minutes
               redisClient.set(store + '_' + id, profile, 'EX', 120)
