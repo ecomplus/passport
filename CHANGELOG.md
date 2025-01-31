@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.14](https://github.com/ecomplus/passport/compare/v0.2.13...v0.2.14) (2025-01-31)
+
+
+### Features
+
+* add `group` to public listed customer fields ([159bc5f](https://github.com/ecomplus/passport/commit/159bc5f9eaadc2ceb8209868f1512e33fdd71e03))
+
 ### [0.2.13](https://github.com/ecomplus/passport/compare/v0.2.12...v0.2.13) (2023-07-03)
 
 
