@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.15](https://github.com/ecomplus/passport/compare/v0.2.14...v0.2.15) (2025-02-27)
+
+
+### Features
+
+* add `state` to public listed customer fields ([7265c44](https://github.com/ecomplus/passport/commit/7265c44471852ac0246a997ed1b0576ff20c36be))
+
 ### [0.2.14](https://github.com/ecomplus/passport/compare/v0.2.13...v0.2.14) (2025-01-31)
 
 
